@@ -1,0 +1,13 @@
+.idea/
+node_modules/
+lerna-debug.log
+npm-debug.log
+packages/*/dist
+coverage
+.vscode/
+packages/*/.npmrc
+.DS_Store
+*.zip
+*.tar.gz
+yarn-error.log
+.env

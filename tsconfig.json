@@ -1,0 +1,31 @@
+{
+    "compilerOptions": {
+        "lib": ["es2020"],
+        "removeComments": true,
+        "moduleResolution": "node",
+        "module": "commonjs",
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "strictNullChecks": true,
+        "target": "es2017",
+        "noImplicitAny": false,
+        "sourceMap": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "resolveJsonModule": true,
+        "declaration": false,
+        "listFiles": false,
+        "importHelpers": true,
+        "watch": true,
+        "rootDir": "./",
+        "allowJs": true,
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "baseUrl": "./",
+        "paths": {
+            "@dotsec/*": ["./packages/*/"]
+        }
+    },
+    "exclude": ["node_modules"],
+    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"]
+}
