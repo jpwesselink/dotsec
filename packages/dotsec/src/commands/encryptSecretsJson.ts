@@ -70,6 +70,7 @@ export const handler = async (
             },
             verbose: argv.verbose,
         });
+
         if (argv.verbose) {
             info(
                 `Encrypting using key alias ${bold(argv.awsKeyAlias)} in ${bold(

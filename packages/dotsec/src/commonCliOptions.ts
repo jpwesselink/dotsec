@@ -12,11 +12,15 @@ export const commonCliOptions = {
     awsKeyAlias: {
         string: true,
         default: 'alias/top-secret',
-        describe: 'AWS KMS asymmetric key alias',
+        describe: 'AWS KMS key alias',
+    },
+    awsKeyArn: {
+        string: true,
+        describe: 'AWS KMS key id',
     },
     awsKey: {
         string: true,
-        describe: 'AWS KMS asymmetric key arn',
+        describe: 'AWS KMS key arn',
     },
 
     envFile: {
