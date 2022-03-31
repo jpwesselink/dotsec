@@ -4,7 +4,12 @@ module.exports = {
         tsconfigRootDir: __dirname,
         project: ['./tsconfig.json'],
     },
-    ignorePatterns: ['node_modules/**', '.storybook/**', 'generators/app/templates/**', '!.eslintrc.js'],
+    ignorePatterns: [
+        'node_modules/**',
+        '.storybook/**',
+        'generators/app/templates/**',
+        '!.eslintrc.js',
+    ],
     plugins: ['import', 'prettier', 'unused-imports', '@typescript-eslint'],
     env: {
         browser: true,
@@ -52,7 +57,13 @@ module.exports = {
         'import/no-extraneous-dependencies': [
             'error',
             {
-                devDependencies: ['**/*.test.ts', '**/*.test.js', '**/*.spec.ts', '**/*.spec.js', 'setupTest.ts'],
+                devDependencies: [
+                    '**/*.test.ts',
+                    '**/*.test.js',
+                    '**/*.spec.ts',
+                    '**/*.spec.js',
+                    'setupTest.ts',
+                ],
             },
         ],
         'import/order': [

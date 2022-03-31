@@ -24,20 +24,37 @@ export const createProgram = ({
         .option('-e, --env <envFile>', 'Custom env file (default: ./.env)')
         .option('-s, --sec <secFile>', 'Custom sec file (default: ./.sec)')
         // .option('--fallback', 'Fallback to default env file path, if custom env file path not found')
-        .option('--no-override', 'Do not override existing environment variables')
-        .option('--silent', 'Ignore any env-cmd errors and only fail on executed program failure.')
-        .option('--use-shell', 'Execute the command in a new shell with the given environment')
+        .option(
+            '--no-override',
+            'Do not override existing environment variables',
+        )
+        .option(
+            '--silent',
+            'Ignore any env-cmd errors and only fail on executed program failure.',
+        )
+        .option(
+            '--use-shell',
+            'Execute the command in a new shell with the given environment',
+        )
         .option('--verbose', 'Print helpful debugging information')
-        .option('-x, --expand-envs', 'Replace $var in args and command with environment variables')
+        .option(
+            '-x, --expand-envs',
+            'Replace $var in args and command with environment variables',
+        )
         .allowUnknownOption(true)
         .action((opts: { verbose?: boolean }) => {
             if (execute) {
                 console.log('giii', opts, command, commandArgs);
                 if (command) {
-                    const proc = spawn(command, commandArgs || [], { stdio: 'inherit', env: { MEKKER: '123', ...process.env } });
+                    const proc = spawn(command, commandArgs || [], {
+                        stdio: 'inherit',
+                        env: { MEKKER: '123', ...process.env },
+                    });
 
                     // Handle any termination signals for parent and child proceses
-                    const signals = new TermSignals({ verbose: opts.verbose || true });
+                    const signals = new TermSignals({
+                        verbose: opts.verbose || true,
+                    });
                     signals.handleUncaughtExceptions();
                     signals.handleTermSignals(proc);
                 }

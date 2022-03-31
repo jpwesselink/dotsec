@@ -1,10 +1,18 @@
-import { getCredentialsProfileRegion, printVerboseCredentialsProfileRegion } from '../../utils/getCredentialsProfileRegion';
+import {
+    getCredentialsProfileRegion,
+    printVerboseCredentialsProfileRegion,
+} from '../../utils/getCredentialsProfileRegion';
 
 export const handleCredentialsAndRegion = async ({
     argv,
     env,
 }: {
-    argv: { awsRegion?: string; awsProfile?: string; verbose?: boolean };
+    argv: {
+        awsRegion?: string;
+        awsProfile?: string;
+        verbose?: boolean;
+        awsAssumeRoleArn?: string;
+    };
     env: {
         AWS_PROFILE?: string | undefined;
         AWS_ACCESS_KEY_ID?: string | undefined;
@@ -14,15 +22,26 @@ export const handleCredentialsAndRegion = async ({
         TZ?: string;
     };
 }) => {
-    const { credentialsAndOrigin, regionAndOrigin } = await getCredentialsProfileRegion({
-        argv: { region: argv.awsRegion, profile: argv.awsProfile },
-        env: {
-            ...env,
-        },
-    });
+    const { credentialsAndOrigin, regionAndOrigin, profileAndOrigin } =
+        await getCredentialsProfileRegion({
+            argv: {
+                region: argv.awsRegion,
+                profile: argv.awsProfile,
+                assumeRoleArn: argv.awsAssumeRoleArn,
+            },
+            env: {
+                ...env,
+            },
+        });
 
     if (argv.verbose === true) {
-        console.log(printVerboseCredentialsProfileRegion({ credentialsAndOrigin, regionAndOrigin }));
+        console.log(
+            printVerboseCredentialsProfileRegion({
+                credentialsAndOrigin,
+                regionAndOrigin,
+                profileAndOrigin,
+            }),
+        );
     }
 
     if (!credentialsAndOrigin || !regionAndOrigin) {

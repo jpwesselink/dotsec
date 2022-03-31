@@ -11,3 +11,4 @@ packages/*/.npmrc
 *.tar.gz
 yarn-error.log
 .env
+secrets.json

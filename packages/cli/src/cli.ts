@@ -14,10 +14,13 @@ const createConvertProgram = () => {
             .addHelpCommand()
     );
 };
-const createProgram = () => {
-    const program = new Command();
-    return program.version(packageJson.version, '-v, --version').addCommand(createConvertProgram()).addHelpCommand();
-};
+// const createProgram = () => {
+//     const program = new Command();
+//     return program
+//         .version(packageJson.version, '-v, --version')
+//         .addCommand(createConvertProgram())
+//         .addHelpCommand();
+// };
 
 const wee = () => {
     // strip off node and program. Why?

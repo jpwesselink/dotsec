@@ -11,11 +11,28 @@ export const commonCliOptions = {
     },
     awsKeyAlias: {
         string: true,
+        default: 'alias/top-secret',
         describe: 'AWS KMS asymmetric key alias',
     },
     awsKey: {
         string: true,
         describe: 'AWS KMS asymmetric key arn',
+    },
+
+    envFile: {
+        string: true,
+        describe: '.env file',
+        default: '.env',
+    },
+
+    secFile: {
+        string: true,
+        describe: '.sec file',
+        default: '.sec',
+    },
+    awsAssumeRoleArn: {
+        string: true,
+        describe: 'arn or role to assume',
     },
 
     verbose: {
