@@ -27,6 +27,7 @@ export const getCredentialsProfileRegion = async ({
         AWS_SECRET_ACCESS_KEY?: string;
         AWS_REGION?: string;
         AWS_DEFAULT_REGION?: string;
+        AWS_ASSUME_ROLE_ARN?: string | undefined;
         TZ?: string;
     };
 }) => {
@@ -113,20 +114,23 @@ export const getCredentialsProfileRegion = async ({
         }
     }
 
-    if (argv.assumeRoleArn) {
-        console.log('assume this yo');
+    const assumedRole = argv.assumeRoleArn || env.AWS_ASSUME_ROLE_ARN;
+    if (assumedRole) {
+        const origin = argv.assumeRoleArn
+            ? 'command line option'
+            : 'env variable';
         credentialsAndOrigin = {
             value: await fromTemporaryCredentials({
                 masterCredentials: credentialsAndOrigin?.value,
                 params: {
-                    RoleArn: argv.assumeRoleArn,
+                    RoleArn: assumedRole,
                 },
 
                 clientConfig: {
                     region: regionAndOrigin?.value,
                 },
             })(),
-            origin: `assume role ${bold(`[${argv.assumeRoleArn}]`)}`,
+            origin: `${origin} ${bold(`[${assumedRole}]`)}`,
         };
     }
 

@@ -84,14 +84,23 @@ export const handler = async (
     argv: YargsHandlerParams<typeof builder>,
 ): Promise<void> => {
     try {
+        let env: Record<string, string> | undefined;
+        if (argv.envFile) {
+            env = parse(fs.readFileSync(argv.envFile, { encoding: 'utf8' }));
+        }
+
         let awsEnv: Record<string, string> | undefined;
 
         const { credentialsAndOrigin, regionAndOrigin } =
             await handleCredentialsAndRegion({
                 argv: { ...argv },
-                env: { ...process.env },
+                env: {
+                    ...process.env,
+                    AWS_ASSUME_ROLE_ARN:
+                        process.env.AWS_ASSUME_ROLE_ARN ||
+                        env?.AWS_ASSUME_ROLE_ARN,
+                },
             });
-        //         `AWS_ACCESS_KEY_ID=${AccessKeyId} AWS_SECRET_ACCESS_KEY=${SecretAccessKey} AWS_SESSION_TOKEN=${SessionToken}`
 
         if (
             argv.awsAssumeRoleArn &&
@@ -109,10 +118,7 @@ export const handler = async (
             console.log({ credentialsAndOrigin, regionAndOrigin });
         }
 
-        let env: Record<string, string> | undefined;
-        if (argv.envFile) {
-            env = parse(fs.readFileSync(argv.envFile, { encoding: 'utf8' }));
-        } else if (argv.secFile) {
+        if (!argv.envFile && argv.secFile) {
             env = await handleSec({
                 secFile: argv.secFile,
                 credentialsAndOrigin,

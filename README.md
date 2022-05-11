@@ -10,10 +10,34 @@ Secure dot env. Encrypts your .env so you can safely store it in your project.
 npx dotsec --env-file .env {command}
 ```
 
-This command also supports injecting AWS assumed role credentials into the process environment:
+This command also supports injecting AWS assumed role credentials into the process environment.
+
+You can specify the ARN of the role to assume in three ways:
+
+- By adding the `--aws-assume-role-arn` flag
+- By setting the `AWS_ASSUME_ROLE_ARN` environment variable
+- By adding the `AWS_ASSUME_ROLE_ARN` environment variable to your target `.env` file
+
+#### By adding the `--aws-assume-role-arn` flag
 
 ```sh
 npx dotsec --env-file .env --aws-assume-role-arn arn:aws:iam::123456789012:role/special-role {command}
+```
+
+#### By setting the `AWS_ASSUME_ROLE_ARN` environment variable
+
+```sh
+AWS_ASSUME_ROLE_ARN=arn:aws:iam::123456789012:role/special-role npx dotsec --env-file .env {command}
+```
+
+#### By adding the `AWS_ASSUME_ROLE_ARN` environment variable to your target `.env` file
+
+...
+AWS_ASSUME_ROLE_ARN=arn:aws:iam::123456789012:role/special-role
+...
+
+```sh
+npx dotsec --env-file .env {command}
 ```
 
 #### Secure usage

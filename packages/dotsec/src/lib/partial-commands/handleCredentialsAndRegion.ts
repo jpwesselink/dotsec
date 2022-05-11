@@ -19,6 +19,7 @@ export const handleCredentialsAndRegion = async ({
         AWS_SECRET_ACCESS_KEY?: string | undefined;
         AWS_REGION?: string | undefined;
         AWS_DEFAULT_REGION?: string | undefined;
+        AWS_ASSUME_ROLE_ARN?: string | undefined;
         TZ?: string;
     };
 }) => {
