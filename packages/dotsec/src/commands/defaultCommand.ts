@@ -25,7 +25,7 @@ export const builder = {
     'aws-key-alias': commonCliOptions.awsKeyAlias,
     'sec-file': commonCliOptions.secFile,
     'env-file': commonCliOptions.envFile,
-    'assume-role-arn': commonCliOptions.awsAssumeRoleArn,
+    'aws-assume-role-arn': commonCliOptions.awsAssumeRoleArn,
     verbose: commonCliOptions.verbose,
     // yes: { ...commonCliOptions.yes },
     command: { string: true, required: true },
@@ -84,17 +84,33 @@ export const handler = async (
     argv: YargsHandlerParams<typeof builder>,
 ): Promise<void> => {
     try {
+        let awsEnv: Record<string, string> | undefined;
+
         const { credentialsAndOrigin, regionAndOrigin } =
             await handleCredentialsAndRegion({
                 argv: { ...argv },
                 env: { ...process.env },
             });
+        //         `AWS_ACCESS_KEY_ID=${AccessKeyId} AWS_SECRET_ACCESS_KEY=${SecretAccessKey} AWS_SESSION_TOKEN=${SessionToken}`
+
+        if (
+            argv.awsAssumeRoleArn &&
+            credentialsAndOrigin.value.sessionToken !== undefined
+        ) {
+            awsEnv = {
+                AWS_ACCESS_KEY_ID: credentialsAndOrigin.value.accessKeyId,
+                AWS_SECRET_ACCESS_KEY:
+                    credentialsAndOrigin.value.secretAccessKey,
+                AWS_SESSION_TOKEN: credentialsAndOrigin.value.sessionToken,
+            };
+            // this means we have
+        }
         if (argv.verbose) {
             console.log({ credentialsAndOrigin, regionAndOrigin });
         }
+
         let env: Record<string, string> | undefined;
         if (argv.envFile) {
-            console.log('OK');
             env = parse(fs.readFileSync(argv.envFile, { encoding: 'utf8' }));
         } else if (argv.secFile) {
             env = await handleSec({
@@ -154,7 +170,7 @@ export const handler = async (
             spawn(argv.command, [...userCommandArgs], {
                 stdio: 'inherit',
                 shell: false,
-                env: { ...process.env, ...env },
+                env: { ...process.env, ...awsEnv, ...env },
             });
         }
     } catch (e) {

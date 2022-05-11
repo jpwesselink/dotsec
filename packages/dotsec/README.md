@@ -10,6 +10,12 @@ Secure dot env. Encrypts your .env so you can safely store it in your project.
 npx dotsec --env-file .env {command}
 ```
 
+This command also supports injecting AWS assumed role credentials into the process environment:
+
+```sh
+npx dotsec --env-file .env --aws-assume-role-arn arn:aws:iam::123456789012:role/special-role {command}
+```
+
 #### Secure usage
 
 Create a user managed AWS KMS key, add an alias. Refer to the AWS documentation for [creating keys](https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) and [managing aliases](https://docs.aws.amazon.com/kms/latest/developerguide/alias-manage.html#alias-create)
