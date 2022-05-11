@@ -103,7 +103,9 @@ export const handler = async (
             });
 
         if (
-            argv.awsAssumeRoleArn &&
+            (argv.awsAssumeRoleArn ||
+                process.env.AWS_ASSUME_ROLE_ARN ||
+                env?.AWS_ASSUME_ROLE_ARN) &&
             credentialsAndOrigin.value.sessionToken !== undefined
         ) {
             awsEnv = {
