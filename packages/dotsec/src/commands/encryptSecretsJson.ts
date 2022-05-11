@@ -1,8 +1,9 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { DescribeKeyCommand, EncryptCommand } from '@aws-sdk/client-kms';
 import { redBright } from 'chalk';
 import flat from 'flat';
-import fs from 'node:fs';
-import path from 'node:path';
 
 import { commonCliOptions } from '../commonCliOptions';
 import { handleCredentialsAndRegion } from '../lib/partial-commands/handleCredentialsAndRegion';

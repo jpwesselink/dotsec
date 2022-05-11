@@ -21,6 +21,15 @@ type Config = {
     account?: string;
     pathPrefix?: string; // "/";
     key?: { arn: string; aliasArn?: never } | { arn?: never; aliasArn: string };
+    parseOptions?: {
+        types?: {
+            ssm?: {
+                secureStrings?: {
+                    pathMatches: string[];
+                };
+            };
+        };
+    };
 };
 
 export type Parameter = string;
