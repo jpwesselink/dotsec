@@ -40,6 +40,8 @@ AWS_ASSUME_ROLE_ARN=arn:aws:iam::123456789012:role/special-role
 npx dotsec --env-file .env {command}
 ```
 
+Please refer to `dotsec help` for more information on other command line options.
+
 #### Secure usage
 
 Create a user managed AWS KMS key, add an alias. Refer to the AWS documentation for [creating keys](https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) and [managing aliases](https://docs.aws.amazon.com/kms/latest/developerguide/alias-manage.html#alias-create)

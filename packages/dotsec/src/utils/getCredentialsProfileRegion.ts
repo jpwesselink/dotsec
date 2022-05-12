@@ -20,6 +20,7 @@ export const getCredentialsProfileRegion = async ({
         profile?: string;
         region?: string;
         assumeRoleArn?: string;
+        assumeRoleSessionDuration?: number;
     };
     env: {
         AWS_PROFILE?: string;
@@ -28,6 +29,7 @@ export const getCredentialsProfileRegion = async ({
         AWS_REGION?: string;
         AWS_DEFAULT_REGION?: string;
         AWS_ASSUME_ROLE_ARN?: string | undefined;
+        AWS_ASSUME_ROLE_SESSION_DURATION?: string | undefined;
         TZ?: string;
     };
 }) => {
@@ -122,7 +124,12 @@ export const getCredentialsProfileRegion = async ({
         credentialsAndOrigin = {
             value: await fromTemporaryCredentials({
                 masterCredentials: credentialsAndOrigin?.value,
+
                 params: {
+                    DurationSeconds:
+                        argv.assumeRoleSessionDuration ||
+                        Number(env.AWS_ASSUME_ROLE_SESSION_DURATION) ||
+                        3600,
                     RoleArn: assumedRole,
                 },
 

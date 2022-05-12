@@ -25,7 +25,10 @@ export const builder = {
     'aws-key-alias': commonCliOptions.awsKeyAlias,
     'sec-file': commonCliOptions.secFile,
     'env-file': commonCliOptions.envFile,
+    'ignore-missing-env-file': commonCliOptions.ignoreMissingEnvFile,
     'aws-assume-role-arn': commonCliOptions.awsAssumeRoleArn,
+    'aws-assume-role-session-duration':
+        commonCliOptions.awsAssumeRoleSessionDuration,
     verbose: commonCliOptions.verbose,
     // yes: { ...commonCliOptions.yes },
     command: { string: true, required: true },
@@ -85,8 +88,16 @@ export const handler = async (
 ): Promise<void> => {
     try {
         let env: Record<string, string> | undefined;
-        if (argv.envFile) {
-            env = parse(fs.readFileSync(argv.envFile, { encoding: 'utf8' }));
+        try {
+            if (argv.envFile) {
+                env = parse(
+                    fs.readFileSync(argv.envFile, { encoding: 'utf8' }),
+                );
+            }
+        } catch (e) {
+            if (argv.ignoreMissingEnvFile !== true) {
+                throw e;
+            }
         }
 
         let awsEnv: Record<string, string> | undefined;
@@ -96,9 +107,10 @@ export const handler = async (
                 argv: { ...argv },
                 env: {
                     ...process.env,
-                    AWS_ASSUME_ROLE_ARN:
-                        process.env.AWS_ASSUME_ROLE_ARN ||
-                        env?.AWS_ASSUME_ROLE_ARN,
+                    ...env,
+                    // AWS_ASSUME_ROLE_ARN:
+                    //     process.env.AWS_ASSUME_ROLE_ARN ||
+                    //     env?.AWS_ASSUME_ROLE_ARN,
                 },
             });
 

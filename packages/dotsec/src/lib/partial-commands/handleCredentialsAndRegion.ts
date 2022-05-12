@@ -12,6 +12,7 @@ export const handleCredentialsAndRegion = async ({
         awsProfile?: string;
         verbose?: boolean;
         awsAssumeRoleArn?: string;
+        awsAssumeRoleSessionDuration?: number;
     };
     env: {
         AWS_PROFILE?: string | undefined;
@@ -20,6 +21,7 @@ export const handleCredentialsAndRegion = async ({
         AWS_REGION?: string | undefined;
         AWS_DEFAULT_REGION?: string | undefined;
         AWS_ASSUME_ROLE_ARN?: string | undefined;
+        AWS_ASSUME_ROLE_SESSION_DURATION?: string | undefined;
         TZ?: string;
     };
 }) => {
@@ -29,6 +31,7 @@ export const handleCredentialsAndRegion = async ({
                 region: argv.awsRegion,
                 profile: argv.awsProfile,
                 assumeRoleArn: argv.awsAssumeRoleArn,
+                assumeRoleSessionDuration: argv.awsAssumeRoleSessionDuration,
             },
             env: {
                 ...env,

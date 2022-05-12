@@ -22,13 +22,15 @@ export const commonCliOptions = {
         string: true,
         describe: 'AWS KMS key arn',
     },
-
     envFile: {
         string: true,
         describe: '.env file',
         default: '.env',
     },
-
+    ignoreMissingEnvFile: {
+        boolean: true,
+        describe: `Don't halt on missing .env file`,
+    },
     secFile: {
         string: true,
         describe: '.sec file',
@@ -36,9 +38,14 @@ export const commonCliOptions = {
     },
     awsAssumeRoleArn: {
         string: true,
-        describe: 'arn or role to assume',
+        describe:
+            'arn or role to assume. Can also be set using the AWS_ASSUME_ROLE_ARN environment variable, or, when using --env-file in the target env file. The cli option overrides the environment variable.',
     },
-
+    awsAssumeRoleSessionDuration: {
+        number: true,
+        describe:
+            'Duration of assume role sessions. Defaults to 3600 seconds. Can also be set using the AWS_ASSUME_ROLE_SESSION_DURATION environment variable, or, when using --env-file in the target env file. The cli option overrides the environment variable.',
+    },
     verbose: {
         boolean: true,
         describe: 'Be verbose',
