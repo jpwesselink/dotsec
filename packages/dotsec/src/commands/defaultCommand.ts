@@ -88,98 +88,57 @@ export const handler = async (
 ): Promise<void> => {
     try {
         let env: Record<string, string> | undefined;
+        let awsEnv: Record<string, string> | undefined;
         try {
             if (argv.envFile) {
                 env = parse(
                     fs.readFileSync(argv.envFile, { encoding: 'utf8' }),
                 );
+            } else {
+                const { credentialsAndOrigin, regionAndOrigin } =
+                    await handleCredentialsAndRegion({
+                        argv: { ...argv },
+                        env: {
+                            ...process.env,
+                            ...env,
+                            // AWS_ASSUME_ROLE_ARN:
+                            //     process.env.AWS_ASSUME_ROLE_ARN ||
+                            //     env?.AWS_ASSUME_ROLE_ARN,
+                        },
+                    });
+
+                if (
+                    (argv.awsAssumeRoleArn ||
+                        process.env.AWS_ASSUME_ROLE_ARN ||
+                        env?.AWS_ASSUME_ROLE_ARN) &&
+                    credentialsAndOrigin.value.sessionToken !== undefined
+                ) {
+                    awsEnv = {
+                        AWS_ACCESS_KEY_ID:
+                            credentialsAndOrigin.value.accessKeyId,
+                        AWS_SECRET_ACCESS_KEY:
+                            credentialsAndOrigin.value.secretAccessKey,
+                        AWS_SESSION_TOKEN:
+                            credentialsAndOrigin.value.sessionToken,
+                    };
+                    // this means we have
+                }
+                if (argv.verbose) {
+                    console.log({ credentialsAndOrigin, regionAndOrigin });
+                }
+
+                env = await handleSec({
+                    secFile: argv.secFile,
+                    credentialsAndOrigin,
+                    regionAndOrigin,
+                    awsKeyAlias: argv.awsKeyAlias,
+                });
             }
         } catch (e) {
             if (argv.ignoreMissingEnvFile !== true) {
                 throw e;
             }
         }
-
-        let awsEnv: Record<string, string> | undefined;
-
-        const { credentialsAndOrigin, regionAndOrigin } =
-            await handleCredentialsAndRegion({
-                argv: { ...argv },
-                env: {
-                    ...process.env,
-                    ...env,
-                    // AWS_ASSUME_ROLE_ARN:
-                    //     process.env.AWS_ASSUME_ROLE_ARN ||
-                    //     env?.AWS_ASSUME_ROLE_ARN,
-                },
-            });
-
-        if (
-            (argv.awsAssumeRoleArn ||
-                process.env.AWS_ASSUME_ROLE_ARN ||
-                env?.AWS_ASSUME_ROLE_ARN) &&
-            credentialsAndOrigin.value.sessionToken !== undefined
-        ) {
-            awsEnv = {
-                AWS_ACCESS_KEY_ID: credentialsAndOrigin.value.accessKeyId,
-                AWS_SECRET_ACCESS_KEY:
-                    credentialsAndOrigin.value.secretAccessKey,
-                AWS_SESSION_TOKEN: credentialsAndOrigin.value.sessionToken,
-            };
-            // this means we have
-        }
-        if (argv.verbose) {
-            console.log({ credentialsAndOrigin, regionAndOrigin });
-        }
-
-        if (!argv.envFile && argv.secFile) {
-            env = await handleSec({
-                secFile: argv.secFile,
-                credentialsAndOrigin,
-                regionAndOrigin,
-                awsKeyAlias: argv.awsKeyAlias,
-            });
-        }
-
-        // const secSource = path.resolve(process.cwd(), argv.secFile);
-        // if (!(await fileExists(secSource))) {
-        //     console.error(`Could not open ${redBright(secSource)}`);
-        //     return;
-        // }
-        // const parsedSec = parse(
-        //     fs.readFileSync(secSource, { encoding: 'utf8' }),
-        // );
-
-        // const kmsClient = new KMSClient({
-        //     credentials: credentialsAndOrigin.value,
-        //     region: regionAndOrigin.value,
-        // });
-
-        // const envEntries: [string, string][] = await Promise.all(
-        //     Object.entries(parsedSec).map(async ([key, cipherText]) => {
-        //         const decryptCommand = new DecryptCommand({
-        //             KeyId: argv.awsKeyAlias,
-        //             CiphertextBlob: Buffer.from(cipherText, 'base64'),
-        //             EncryptionAlgorithm: 'RSAES_OAEP_SHA_256',
-        //         });
-        //         const decryptionResult = await kmsClient.send(decryptCommand);
-
-        //         if (!decryptionResult?.Plaintext) {
-        //             throw new Error(
-        //                 `No: ${JSON.stringify({
-        //                     key,
-        //                     cipherText,
-        //                     decryptCommand,
-        //                 })}`,
-        //             );
-        //         }
-        //         const value = Buffer.from(
-        //             decryptionResult.Plaintext,
-        //         ).toString();
-        //         return [key, value];
-        //     }),
-        // );
-        // const env = Object.fromEntries(envEntries);
 
         //
         const userCommandArgs = process.argv.slice(
