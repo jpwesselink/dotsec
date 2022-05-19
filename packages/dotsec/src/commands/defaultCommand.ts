@@ -89,11 +89,43 @@ export const handler = async (
     try {
         let env: Record<string, string> | undefined;
         let awsEnv: Record<string, string> | undefined;
+
         try {
             if (argv.envFile) {
                 env = parse(
                     fs.readFileSync(argv.envFile, { encoding: 'utf8' }),
                 );
+
+                if (
+                    argv.awsAssumeRoleArn ||
+                    process.env.AWS_ASSUME_ROLE_ARN ||
+                    env?.AWS_ASSUME_ROLE_ARN
+                ) {
+                    const { credentialsAndOrigin, regionAndOrigin } =
+                        await handleCredentialsAndRegion({
+                            argv: { ...argv },
+                            env: {
+                                ...process.env,
+                                ...env,
+                                // AWS_ASSUME_ROLE_ARN:
+                                //     process.env.AWS_ASSUME_ROLE_ARN ||
+                                //     env?.AWS_ASSUME_ROLE_ARN,
+                            },
+                        });
+
+                    awsEnv = {
+                        AWS_ACCESS_KEY_ID:
+                            credentialsAndOrigin.value.accessKeyId,
+                        AWS_SECRET_ACCESS_KEY:
+                            credentialsAndOrigin.value.secretAccessKey,
+                    };
+
+                    if (credentialsAndOrigin.value.sessionToken) {
+                        awsEnv.AWS_SESSION_TOKEN =
+                            credentialsAndOrigin.value.sessionToken;
+                    }
+                    // this means we have
+                }
             } else {
                 const { credentialsAndOrigin, regionAndOrigin } =
                     await handleCredentialsAndRegion({
