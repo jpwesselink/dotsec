@@ -25,7 +25,6 @@ export const commonCliOptions = {
     envFile: {
         string: true,
         describe: '.env file',
-        default: '.env',
     },
     ignoreMissingEnvFile: {
         boolean: true,
@@ -49,6 +48,15 @@ export const commonCliOptions = {
     verbose: {
         boolean: true,
         describe: 'Be verbose',
+    },
+    encryptedSecretsFile: {
+        string: true,
+        describe: 'filename of json file for reading encrypted secrets',
+    },
+    jsonFilter: {
+        string: true,
+        describe:
+            'dot separated filter path, for example a.b.c will return { a: { b: { c: ... }}}',
     },
     // regions: {
     //     describe: 'AWS region',

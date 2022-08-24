@@ -12,3 +12,5 @@ packages/*/.npmrc
 yarn-error.log
 .env
 secrets.json
+.sec
+

@@ -1,14 +1,15 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { DecryptCommand, DescribeKeyCommand } from '@aws-sdk/client-kms';
 import { redBright } from 'chalk';
 import flat from 'flat';
-import fs from 'node:fs';
-import path from 'node:path';
 
 import { commonCliOptions } from '../commonCliOptions';
 import { handleCredentialsAndRegion } from '../lib/partial-commands/handleCredentialsAndRegion';
 import { EncryptedSecrets, Secrets, YargsHandlerParams } from '../types';
 import { fileExists, promptOverwriteIfFileExists } from '../utils/io';
-import { getKMSClient } from '../utils/kms';
+import { getEncryptionAlgorithm, getKMSClient } from '../utils/kms';
 import { bold, getLogger, underline } from '../utils/logger';
 export const command = 'decrypt-secrets-json';
 export const desc = 'Derypts an encrypted file';
@@ -23,8 +24,7 @@ export const builder = {
         default: 'secrets.json',
     },
     'encrypted-secrets-file': {
-        string: true,
-        describe: 'filename of json file for reading encrypted secrets',
+        ...commonCliOptions.encryptedSecretsFile,
         default: 'secrets.encrypted.json',
     },
     'assume-role-arn': commonCliOptions.awsAssumeRoleArn,
@@ -91,6 +91,11 @@ export const handler = async (
             console.log('describeKeyResult', { describeKeyResult });
         }
 
+        const encryptionAlgorithm = await getEncryptionAlgorithm(
+            kmsClient,
+            argv.awsKeyAlias,
+        );
+
         const flatParameters = Object.fromEntries(
             await Promise.all(
                 Object.entries(flatEncryptedParameters).map(
@@ -101,7 +106,7 @@ export const handler = async (
                                 encryptedParameter,
                                 'base64',
                             ),
-                            EncryptionAlgorithm: 'RSAES_OAEP_SHA_256',
+                            EncryptionAlgorithm: encryptionAlgorithm,
                         });
 
                         const decryptionResult = await kmsClient.send(

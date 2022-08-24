@@ -1,15 +1,16 @@
-import { DecryptCommand, DescribeKeyCommand } from '@aws-sdk/client-kms';
+import fs from 'node:fs';
+import path from 'node:path';
+
+import { DecryptCommand } from '@aws-sdk/client-kms';
 import { PutParameterCommand } from '@aws-sdk/client-ssm';
 import { redBright } from 'chalk';
 import flat from 'flat';
-import fs from 'node:fs';
-import path from 'node:path';
 
 import { commonCliOptions } from '../commonCliOptions';
 import { handleCredentialsAndRegion } from '../lib/partial-commands/handleCredentialsAndRegion';
 import { EncryptedSecrets, YargsHandlerParams } from '../types';
 import { fileExists } from '../utils/io';
-import { getKMSClient } from '../utils/kms';
+import { getEncryptionAlgorithm, getKMSClient } from '../utils/kms';
 import { bold, getLogger, underline } from '../utils/logger';
 import { getSSMClient } from '../utils/ssm';
 export const command = 'offload-secrets-json-to-ssm';
@@ -72,23 +73,19 @@ export const handler = async (
             },
             verbose: argv.verbose,
         });
+
         if (argv.verbose) {
             info(
                 `Encrypting using key alias ${bold(argv.awsKeyAlias)} in ${bold(
                     await kmsClient.config.region(),
                 )}`,
             );
-
-            // describe key *once*
-
-            const describeKeyCommand = new DescribeKeyCommand({
-                KeyId: argv.awsKeyAlias,
-            });
-
-            const describeKeyResult = await kmsClient.send(describeKeyCommand);
-
-            console.log('describeKeyResult', { describeKeyResult });
         }
+
+        const encryptionAlgorithm = await getEncryptionAlgorithm(
+            kmsClient,
+            argv.awsKeyAlias,
+        );
 
         const flatParameters = Object.fromEntries(
             await Promise.all(
@@ -100,7 +97,7 @@ export const handler = async (
                                 encryptedParameter,
                                 'base64',
                             ),
-                            EncryptionAlgorithm: 'RSAES_OAEP_SHA_256',
+                            EncryptionAlgorithm: encryptionAlgorithm,
                         });
 
                         const decryptionResult = await kmsClient.send(

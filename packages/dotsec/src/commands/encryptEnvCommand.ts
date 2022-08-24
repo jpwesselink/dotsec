@@ -1,14 +1,15 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { DescribeKeyCommand, EncryptCommand } from '@aws-sdk/client-kms';
 import { redBright } from 'chalk';
 import { parse } from 'dotenv';
-import fs from 'node:fs';
-import path from 'node:path';
 
 import { commonCliOptions } from '../commonCliOptions';
 import { handleCredentialsAndRegion } from '../lib/partial-commands/handleCredentialsAndRegion';
 import { YargsHandlerParams } from '../types';
 import { fileExists } from '../utils/io';
-import { getKMSClient } from '../utils/kms';
+import { getEncryptionAlgorithm, getKMSClient } from '../utils/kms';
 import { bold, getLogger, underline } from '../utils/logger';
 export const command = 'encrypt-env';
 export const desc = 'Encrypts a dotenv file';
@@ -17,7 +18,7 @@ export const builder = {
     'aws-profile': commonCliOptions.awsProfile,
     'aws-region': commonCliOptions.awsRegion,
     'aws-key-alias': commonCliOptions.awsKeyAlias,
-    'env-file': commonCliOptions.envFile,
+    'env-file': { ...commonCliOptions.envFile, default: '.env' },
     'sec-file': commonCliOptions.secFile,
     'assume-role-arn': commonCliOptions.awsAssumeRoleArn,
     verbose: commonCliOptions.verbose,
@@ -51,6 +52,12 @@ export const handler = async (
             },
             verbose: argv.verbose,
         });
+
+        const encryptionAlgorithm = await getEncryptionAlgorithm(
+            kmsClient,
+            argv.awsKeyAlias,
+        );
+
         if (argv.verbose) {
             info(
                 `Encrypting using key alias ${bold(argv.awsKeyAlias)} in ${bold(
@@ -75,7 +82,7 @@ export const handler = async (
                     const encryptCommand = new EncryptCommand({
                         KeyId: argv.awsKeyAlias,
                         Plaintext: Buffer.from(value),
-                        EncryptionAlgorithm: 'RSAES_OAEP_SHA_256',
+                        EncryptionAlgorithm: encryptionAlgorithm,
                     });
 
                     const encryptionResult = await kmsClient.send(

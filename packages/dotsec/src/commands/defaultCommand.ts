@@ -3,10 +3,13 @@ import path from 'node:path';
 
 import { KMSClient, DecryptCommand } from '@aws-sdk/client-kms';
 import { redBright } from 'chalk';
+import { constantCase } from 'constant-case';
 import { spawn } from 'cross-spawn';
 import { parse } from 'dotenv';
+import flat from 'flat';
 
 import { commonCliOptions } from '../commonCliOptions';
+import { loadEncryptedSecrets } from '../lib/encryptedSecrets';
 import { handleCredentialsAndRegion } from '../lib/partial-commands/handleCredentialsAndRegion';
 import {
     CredentialsAndOrigin,
@@ -14,6 +17,7 @@ import {
     YargsHandlerParams,
 } from '../types';
 import { fileExists } from '../utils/io';
+import { getEncryptionAlgorithm } from '../utils/kms';
 
 export const command = '$0 <command>';
 export const desc =
@@ -29,6 +33,9 @@ export const builder = {
     'aws-assume-role-arn': commonCliOptions.awsAssumeRoleArn,
     'aws-assume-role-session-duration':
         commonCliOptions.awsAssumeRoleSessionDuration,
+    'encrypted-secrets-file': commonCliOptions.encryptedSecretsFile,
+    'json-filter': commonCliOptions.jsonFilter,
+
     verbose: commonCliOptions.verbose,
     // yes: { ...commonCliOptions.yes },
     command: { string: true, required: true },
@@ -57,12 +64,17 @@ const handleSec = async ({
         region: regionAndOrigin.value,
     });
 
+    const encryptionAlgorithm = await getEncryptionAlgorithm(
+        kmsClient,
+        awsKeyAlias,
+    );
+
     const envEntries: [string, string][] = await Promise.all(
         Object.entries(parsedSec).map(async ([key, cipherText]) => {
             const decryptCommand = new DecryptCommand({
                 KeyId: awsKeyAlias,
                 CiphertextBlob: Buffer.from(cipherText, 'base64'),
-                EncryptionAlgorithm: 'RSAES_OAEP_SHA_256',
+                EncryptionAlgorithm: encryptionAlgorithm,
             });
             const decryptionResult = await kmsClient.send(decryptCommand);
 
@@ -78,6 +90,82 @@ const handleSec = async ({
             const value = Buffer.from(decryptionResult.Plaintext).toString();
             return [key, value];
         }),
+    );
+    const env = Object.fromEntries(envEntries);
+
+    return env;
+};
+const handleEncryptedJson = async ({
+    encryptedSecretsFile,
+    jsonFilter,
+    credentialsAndOrigin,
+    regionAndOrigin,
+    awsKeyAlias,
+}: {
+    encryptedSecretsFile: string;
+    jsonFilter?: string;
+    credentialsAndOrigin: CredentialsAndOrigin;
+    regionAndOrigin: RegionAndOrigin;
+    awsKeyAlias: string;
+}) => {
+    const encryptedSecrets = await loadEncryptedSecrets({
+        encryptedSecretsFile: encryptedSecretsFile,
+    });
+
+    const flattened: Record<string, string> = flat.flatten(
+        encryptedSecrets.encryptedParameters,
+        {
+            delimiter: '__',
+            transformKey: (key) => {
+                return constantCase(key);
+            },
+        },
+    );
+
+    const kmsClient = new KMSClient({
+        credentials: credentialsAndOrigin.value,
+        region: regionAndOrigin.value,
+    });
+
+    const encryptionAlgorithm = await getEncryptionAlgorithm(
+        kmsClient,
+        awsKeyAlias,
+    );
+
+    const filterKey = jsonFilter
+        ?.split('.')
+        .map((part) => constantCase(part))
+        .join('__');
+    const envEntries: [string, string][] = await Promise.all(
+        Object.entries(flattened)
+            .filter(([key]) => {
+                if (filterKey) {
+                    return key.indexOf(filterKey) === 0;
+                }
+                return true;
+            })
+            .map(async ([key, cipherText]) => {
+                const decryptCommand = new DecryptCommand({
+                    KeyId: awsKeyAlias,
+                    CiphertextBlob: Buffer.from(cipherText, 'base64'),
+                    EncryptionAlgorithm: encryptionAlgorithm,
+                });
+                const decryptionResult = await kmsClient.send(decryptCommand);
+
+                if (!decryptionResult?.Plaintext) {
+                    throw new Error(
+                        `No: ${JSON.stringify({
+                            key,
+                            cipherText,
+                            decryptCommand,
+                        })}`,
+                    );
+                }
+                const value = Buffer.from(
+                    decryptionResult.Plaintext,
+                ).toString();
+                return [key, value];
+            }),
     );
     const env = Object.fromEntries(envEntries);
 
@@ -159,12 +247,44 @@ export const handler = async (
                     console.log({ credentialsAndOrigin, regionAndOrigin });
                 }
 
-                env = await handleSec({
-                    secFile: argv.secFile,
-                    credentialsAndOrigin,
-                    regionAndOrigin,
-                    awsKeyAlias: argv.awsKeyAlias,
-                });
+                if (argv.encryptedSecretsFile) {
+                    env = await handleEncryptedJson({
+                        encryptedSecretsFile: argv.encryptedSecretsFile,
+                        jsonFilter: argv.jsonFilter,
+                        credentialsAndOrigin,
+                        regionAndOrigin,
+                        awsKeyAlias: argv.awsKeyAlias,
+                    });
+                    // // load that file
+                    // const encryptedSecrets = await loadEncryptedSecrets({
+                    //     encryptedSecretsFile: argv.encryptedSecretsFile,
+                    // });
+
+                    // const flattened = flat.flatten(encryptedSecrets, {
+                    //     delimiter: '__',
+                    //     transformKey: (key) => {
+                    //         return constantCase(key);
+                    //     },
+                    // });
+
+                    // console.log('flattened', flattened);
+
+                    // const unflattend = flat.unflatten(flattened, {
+                    //     delimiter: '__',
+                    //     transformKey: (key) => {
+                    //         return camelCase(key);
+                    //     },
+                    // });
+
+                    // console.log(JSON.stringify(unflattend, null, 4));
+                } else {
+                    env = await handleSec({
+                        secFile: argv.secFile,
+                        credentialsAndOrigin,
+                        regionAndOrigin,
+                        awsKeyAlias: argv.awsKeyAlias,
+                    });
+                }
             }
         } catch (e) {
             if (argv.ignoreMissingEnvFile !== true) {

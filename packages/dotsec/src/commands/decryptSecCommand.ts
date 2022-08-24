@@ -1,13 +1,15 @@
+import fs from 'node:fs';
+import path from 'node:path';
+
 import { KMSClient, DecryptCommand } from '@aws-sdk/client-kms';
 import { redBright } from 'chalk';
 import { parse } from 'dotenv';
-import fs from 'node:fs';
-import path from 'node:path';
 
 import { commonCliOptions } from '../commonCliOptions';
 import { handleCredentialsAndRegion } from '../lib/partial-commands/handleCredentialsAndRegion';
 import { YargsHandlerParams } from '../types';
 import { fileExists } from '../utils/io';
+import { getEncryptionAlgorithm } from '../utils/kms';
 
 export const command = 'decrypt-sec';
 export const desc = 'Decrypts a dotsec file';
@@ -17,7 +19,7 @@ export const builder = {
     'aws-region': commonCliOptions.awsRegion,
     'aws-key-alias': commonCliOptions.awsKeyAlias,
     'assume-role-arn': commonCliOptions.awsAssumeRoleArn,
-    'env-file': commonCliOptions.envFile,
+    'env-file': { ...commonCliOptions.envFile, default: 'env' },
     'sec-file': commonCliOptions.secFile,
     verbose: commonCliOptions.verbose,
     // yes: { ...commonCliOptions.yes },
@@ -47,12 +49,17 @@ export const handler = async (
             region: regionAndOrigin.value,
         });
 
+        const encryptionAlgorithm = await getEncryptionAlgorithm(
+            kmsClient,
+            argv.awsKeyAlias,
+        );
+
         const envEntries: [string, string][] = await Promise.all(
             Object.entries(parsedSec).map(async ([key, cipherText]) => {
                 const decryptCommand = new DecryptCommand({
                     KeyId: argv.awsKeyAlias,
                     CiphertextBlob: Buffer.from(cipherText, 'base64'),
-                    EncryptionAlgorithm: 'RSAES_OAEP_SHA_256',
+                    EncryptionAlgorithm: encryptionAlgorithm,
                 });
                 const decryptionResult = await kmsClient.send(decryptCommand);
 

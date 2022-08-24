@@ -9,7 +9,7 @@ import { commonCliOptions } from '../commonCliOptions';
 import { handleCredentialsAndRegion } from '../lib/partial-commands/handleCredentialsAndRegion';
 import { EncryptedSecrets, Secrets, YargsHandlerParams } from '../types';
 import { fileExists, promptOverwriteIfFileExists } from '../utils/io';
-import { getKMSClient } from '../utils/kms';
+import { getEncryptionAlgorithm, getKMSClient } from '../utils/kms';
 import { bold, getLogger, underline } from '../utils/logger';
 export const command = 'encrypt-secrets-json';
 export const desc = 'Encrypts an unencrypted file';
@@ -90,6 +90,11 @@ export const handler = async (
             console.log('describeKeyResult', { describeKeyResult });
         }
 
+        const encryptionAlgorithm = await getEncryptionAlgorithm(
+            kmsClient,
+            argv.awsKeyAlias,
+        );
+
         const encryptedFlatParameters = Object.fromEntries(
             await Promise.all(
                 Object.entries(flatParameters).map(
@@ -97,7 +102,7 @@ export const handler = async (
                         const encryptCommand = new EncryptCommand({
                             KeyId: argv.awsKeyAlias,
                             Plaintext: Buffer.from(parameter),
-                            EncryptionAlgorithm: 'RSAES_OAEP_SHA_256',
+                            EncryptionAlgorithm: encryptionAlgorithm,
                         });
 
                         const encryptionResult = await kmsClient.send(
