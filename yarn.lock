@@ -3206,6 +3206,13 @@ builtins@^1.0.3:
   resolved "https://registry.yarnpkg.com/builtins/-/builtins-1.0.3.tgz#cb94faeb61c8696451db36534e1422f94f0aee88"
   integrity sha1-y5T662HIaWRR2zZTThQi+U8K7og=
 
+bundle-require@^3.0.4:
+  version "3.0.4"
+  resolved "https://registry.yarnpkg.com/bundle-require/-/bundle-require-3.0.4.tgz#2b52ba77d99c0a586b5854cd21d36954e63cc110"
+  integrity sha512-VXG6epB1yrLAvWVQpl92qF347/UXmncQj7J3U8kZEbdVZ1ZkQyr4hYeL/9RvcE8vVVdp53dY78Fd/3pqfRqI1A==
+  dependencies:
+    load-tsconfig "^0.2.0"
+
 byline@^5.0.0:
   version "5.0.0"
   resolved "https://registry.yarnpkg.com/byline/-/byline-5.0.0.tgz#741c5216468eadc457b03410118ad77de8c1ddb1"
@@ -6481,6 +6488,11 @@ load-json-file@^6.2.0:
     parse-json "^5.0.0"
     strip-bom "^4.0.0"
     type-fest "^0.6.0"
+
+load-tsconfig@^0.2.0:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/load-tsconfig/-/load-tsconfig-0.2.3.tgz#08af3e7744943caab0c75f8af7f1703639c3ef1f"
+  integrity sha512-iyT2MXws+dc2Wi6o3grCFtGXpeMvHmJqS27sMPGtV2eUu4PeFnG+33I8BlFK1t1NWMjOpcx9bridn5yxLDX2gQ==
 
 locate-path@^2.0.0:
   version "2.0.0"
