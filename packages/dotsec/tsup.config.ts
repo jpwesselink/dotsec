@@ -7,5 +7,5 @@ export const tsup: Options = {
     dts: true,
     format: ['cjs', 'esm'],
     legacyOutput: true,
-    entryPoints: ['src/index.ts', 'src/cli.ts'],
+    entryPoints: ['src/index.ts', 'src/cli.ts', 'src/ds/cli.ts'],
 };

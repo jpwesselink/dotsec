@@ -11,7 +11,6 @@ export const commonCliOptions = {
     },
     awsKeyAlias: {
         string: true,
-        default: 'alias/top-secret',
         describe: 'AWS KMS key alias',
     },
     awsKeyArn: {
@@ -45,6 +44,10 @@ export const commonCliOptions = {
         describe:
             'Duration of assume role sessions. Defaults to 3600 seconds. Can also be set using the AWS_ASSUME_ROLE_SESSION_DURATION environment variable, or, when using --env-file in the target env file. The cli option overrides the environment variable.',
     },
+    useTopLevelsAsEnvironments: {
+        boolean: true,
+        describe: 'Use top level keys as environments',
+    },
     verbose: {
         boolean: true,
         describe: 'Be verbose',
@@ -57,6 +60,10 @@ export const commonCliOptions = {
         string: true,
         describe:
             'dot separated filter path, for example a.b.c will return { a: { b: { c: ... }}}',
+    },
+    searchpath: {
+        string: true,
+        describe: 'search path in which to look for secrets tree',
     },
     // regions: {
     //     describe: 'AWS region',

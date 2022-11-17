@@ -1,6 +1,6 @@
 {
     "name": "@dotsec/logger",
-    "version": "0.10.0",
+    "version": "1.0.0-alpha.0",
     "private": true,
     "description": "",
     "main": "./dist/index.js",
@@ -41,7 +41,6 @@
     },
     "dependencies": {
         "pino": "7.8.0",
-        "pino-debug": "^2.0.0",
         "pino-pretty": "^7.5.1"
     }
 }

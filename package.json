@@ -10,7 +10,8 @@
     "postinstall": "lerna bootstrap",
     "lint": "eslint .",
     "prepare": "husky install",
-    "test": "jest --coverage"
+    "test": "jest --coverage",
+    "packages/dotsec": "lerna exec --scope dotsec -- yarn"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.2.1",

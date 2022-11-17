@@ -10,7 +10,7 @@ import {
     ProfileAndOrigin,
     RegionAndOrigin,
 } from '../types';
-import { bold, underline } from './logger';
+import { emphasis, strong } from './logger';
 
 export const getCredentialsProfileRegion = async ({
     argv,
@@ -40,18 +40,18 @@ export const getCredentialsProfileRegion = async ({
     if (argv.profile) {
         profileAndOrigin = {
             value: argv.profile,
-            origin: `command line option: ${bold(argv.profile)}`,
+            origin: `command line option: ${emphasis(argv.profile)}`,
         };
         credentialsAndOrigin = {
             value: await fromIni({
                 profile: argv.profile,
             })(),
-            origin: `${bold(`[${argv.profile}]`)} in credentials file`,
+            origin: `${emphasis(`[${argv.profile}]`)} in credentials file`,
         };
     } else if (env.AWS_PROFILE) {
         profileAndOrigin = {
             value: env.AWS_PROFILE,
-            origin: `env variable ${bold('AWS_PROFILE')}: ${underline(
+            origin: `env variable ${emphasis('AWS_PROFILE')}: ${strong(
                 env.AWS_PROFILE,
             )}`,
         };
@@ -59,46 +59,46 @@ export const getCredentialsProfileRegion = async ({
             value: await fromIni({
                 profile: env.AWS_PROFILE,
             })(),
-            origin: `env variable ${underline('AWS_PROFILE')}: ${bold(
+            origin: `env variable ${emphasis('AWS_PROFILE')}: ${strong(
                 env.AWS_PROFILE,
             )}`,
         };
     } else if (env.AWS_ACCESS_KEY_ID && env.AWS_SECRET_ACCESS_KEY) {
         credentialsAndOrigin = {
             value: await fromEnv()(),
-            origin: `env variables ${bold('AWS_ACCESS_KEY_ID')} and ${bold(
-                'AWS_SECRET_ACCESS_KEY',
-            )}`,
+            origin: `env variables ${emphasis(
+                'AWS_ACCESS_KEY_ID',
+            )} and ${emphasis('AWS_SECRET_ACCESS_KEY')}`,
         };
     } else if (sharedConfigFiles.credentialsFile?.default) {
         profileAndOrigin = {
             value: 'default',
-            origin: `${bold('[default]')} in credentials file`,
+            origin: `${emphasis('[default]')} in credentials file`,
         };
         credentialsAndOrigin = {
             value: await fromIni({
                 profile: 'default',
             })(),
-            origin: `profile ${bold('[default]')}`,
+            origin: `profile ${emphasis('[default]')}`,
         };
     }
 
     if (argv.region) {
         regionAndOrigin = {
             value: argv.region,
-            origin: `command line option: ${bold(argv.region)}`,
+            origin: `command line option: ${emphasis(argv.region)}`,
         };
     } else if (env.AWS_REGION) {
         regionAndOrigin = {
             value: env.AWS_REGION,
-            origin: `env variable ${bold('AWS_REGION')}: ${underline(
+            origin: `env variable ${emphasis('AWS_REGION')}: ${strong(
                 env.AWS_REGION,
             )}`,
         };
     } else if (env.AWS_DEFAULT_REGION) {
         regionAndOrigin = {
             value: env.AWS_DEFAULT_REGION,
-            origin: `env variable ${bold('AWS_DEFAULT_REGION')}: ${underline(
+            origin: `env variable ${emphasis('AWS_DEFAULT_REGION')}: ${strong(
                 env.AWS_DEFAULT_REGION,
             )}`,
         };
@@ -109,7 +109,7 @@ export const getCredentialsProfileRegion = async ({
         if (foundRegion) {
             regionAndOrigin = {
                 value: foundRegion,
-                origin: `${bold(
+                origin: `${emphasis(
                     `[profile ${profileAndOrigin.value}]`,
                 )} in config file`,
             };
@@ -137,7 +137,7 @@ export const getCredentialsProfileRegion = async ({
                     region: regionAndOrigin?.value,
                 },
             })(),
-            origin: `${origin} ${bold(`[${assumedRole}]`)}`,
+            origin: `${origin} ${emphasis(`[${assumedRole}]`)}`,
         };
     }
 

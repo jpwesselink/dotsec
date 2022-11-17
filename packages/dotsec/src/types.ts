@@ -32,7 +32,29 @@ type Config = {
     };
 };
 
+export type Not<T extends { [key: string]: unknown }> = {
+    [P in keyof T]?: never;
+};
+
+export type DeepPartial<T> = T extends object
+    ? {
+          [P in keyof T]?: DeepPartial<T[P]>;
+      }
+    : T;
+
+export type OptionalDeepPartial<
+    T,
+    IgnorePartials extends boolean = false,
+> = IgnorePartials extends true
+    ? T
+    : T extends object
+    ? {
+          [P in keyof T]?: DeepPartial<T[P]>;
+      }
+    : T;
+
 export type Parameter = string;
+
 export type Secrets = {
     config?: Config;
 

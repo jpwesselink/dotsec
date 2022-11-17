@@ -10,7 +10,7 @@ import { handleCredentialsAndRegion } from '../lib/partial-commands/handleCreden
 import { YargsHandlerParams } from '../types';
 import { fileExists } from '../utils/io';
 import { getEncryptionAlgorithm, getKMSClient } from '../utils/kms';
-import { bold, getLogger, underline } from '../utils/logger';
+import { emphasis, getLogger, strong } from '../utils/logger';
 export const command = 'encrypt-env';
 export const desc = 'Encrypts a dotenv file';
 
@@ -60,9 +60,9 @@ export const handler = async (
 
         if (argv.verbose) {
             info(
-                `Encrypting using key alias ${bold(argv.awsKeyAlias)} in ${bold(
-                    await kmsClient.config.region(),
-                )}`,
+                `Encrypting using key alias ${emphasis(
+                    argv.awsKeyAlias,
+                )} in ${emphasis(await kmsClient.config.region())}`,
             );
 
             // describe key *once*
@@ -100,7 +100,7 @@ export const handler = async (
                     }
 
                     if (argv.verbose) {
-                        info(`Encrypting key ${bold(key)} ${underline('ok')}`);
+                        info(`Encrypting key ${emphasis(key)} ${strong('ok')}`);
                     }
 
                     const cipherText = Buffer.from(
