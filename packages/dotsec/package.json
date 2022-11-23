@@ -34,7 +34,7 @@
         "build": "tsup"
     },
     "devDependencies": {
-        "@types/jest": "~26.0.24",
+        "@aws-sdk/types": "^3.52.0",
         "@types/node": "^14.14.19",
         "@types/prompts": "^2.0.14",
         "tsup": "^4.14.0",
@@ -46,7 +46,7 @@
         "@aws-sdk/client-ssm": "^3.52.0",
         "@aws-sdk/credential-providers": "^3.52.0",
         "@aws-sdk/shared-ini-file-loader": "^3.52.0",
-        "@aws-sdk/types": "^3.52.0",
+        "@octokit/core": "^4.1.0",
         "bundle-require": "^3.0.4",
         "camel-case": "^4.1.2",
         "chalk": "^4.1.2",

@@ -1,6 +1,6 @@
-import type { Dotsec } from "dotsec";
+import type { DotsecConfig } from "dotsec";
 
-export const dotsec: Dotsec = {
+export const dotsec: DotsecConfig = {
 	config: {
 		aws: {
 			region: "us-east-1",
@@ -9,4 +9,5 @@ export const dotsec: Dotsec = {
 			},
 		},
 	},
+	variables: {},
 };

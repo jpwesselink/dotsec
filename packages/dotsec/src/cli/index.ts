@@ -4,6 +4,7 @@ import addInitCommand from "./commands/init";
 import addRunCommand from "./commands/run";
 import addDecryptCommand from "./commands/decrypt";
 import addEncryptCommand from "./commands/encrypt";
+import addPushProgram from "./commands/push";
 import { setProgramOptions } from "./options";
 const program = new Command();
 
@@ -22,6 +23,7 @@ setProgramOptions(program);
 	await addRunCommand(program);
 	await addDecryptCommand(program);
 	await addEncryptCommand(program);
+	await addPushProgram(program);
 
 	program.parse();
 })();

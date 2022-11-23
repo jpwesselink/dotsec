@@ -10,6 +10,8 @@ Encrypts your .env file with the AWS Encryption SDK so you can safely commit it 
 - Decryption of .sec files to .env files.
 - Run a command with the values of a .env file in its environment.
 - Run a command with the values of a .sec file in its environment.
+- Push selected .env/.sec entries to AWS Systems Manager Parameter Store.
+- Push selected .env/.sec entries to AWS Secrets Manager.
 
 ## Requirements
 
@@ -86,6 +88,54 @@ npx dotsec encrypt
 
 For more options see `dotsec encrypt --help`.
 
+### Push selected .env/.sec entries to AWS Systems Manager Parameter Store
+
+Take your favorite editor, and edit the `dotsec.config.ts` file. Add the following to the `aws` object:
+
+```ts
+{
+    variables: {
+        "NAME_OF_ENV_VAR_YOU_WANT_TO_PUSH": {
+            push: {
+                aws: {
+                    ssm: true
+                }
+            }
+        }
+    }
+}
+```
+
+> Take a look at the DotsecConfig type for more options on how to configure SSM pushes.
+
+```sh
+npx dotsec push --env --to-aws-ssm
+```
+
+### Push selected .env/.sec entries to AWS Secrets Manager
+
+Take your favorite editor, and edit the `dotsec.config.ts` file. Add the following to the `aws` object:
+
+```ts
+{
+    variables: {
+        "NAME_OF_ENV_VAR_YOU_WANT_TO_PUSH": {
+            push: {
+                aws: {
+                    secretsManager: true
+                }
+            }
+        }
+    }
+}
+```
+
+> Take a look at the DotsecConfig type for more options on how to configure Secrets Manager pushes.
+
+```sh
+npx dotsec push --env --to-aws-secrets-manager
+```
+
 ### FAQ
 
 #### Is it safe to commit a `.sec` and `dotsec.config.ts` file alongside your code?
@@ -106,11 +156,12 @@ We do, however, since this package is relatively new, I don't think you should.
 - [ ] Add chunking for encoding larger files with assymetric keys. Current limit is 4kb.
 - [ ] Add support for other encryption SDKs like GCP KMS, Azure Key Vault, etc.
 - [ ] Split up dotsec package in multiple packages, one for each SDK.
-- [ ] Add support for pushing entries to AWS Systems Manager Parameter Store.
-- [ ] Add support for pulling entries to AWS Secrets Manager.
+- [x] Add support for pushing entries to AWS Systems Manager Parameter Store.
+- [x] Add support for pulling entries to AWS Secrets Manager.
 - [ ] Add support for pulling entries to GitHub actions secrets.
 
 ## Limitations
 
 - The only supported encryption SDK is the AWS Encryption SDK. For now.
 - Assymetric keys are supported, but the encrypted file size is limited to the payload size of the key. Until chunking is implemented, that is.
+- AWS Secrets Manager secrets which are marked for deletion **cannot** be updated until the deletion is complete. As of writing, the minimum deletion time is 7 days. This means that if you want to update a deleted AWS Secrets Manager secret, you have to wait at least 7 days before you can update it again. This is a limitation of AWS Secrets Manager, not dotsec

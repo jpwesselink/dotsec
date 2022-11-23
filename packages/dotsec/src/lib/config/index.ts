@@ -42,8 +42,24 @@ export const getConfig = async (
 					...defaultConfig,
 					...data,
 					config: {
+						...data?.config,
 						...defaultConfig.config,
-						aws: { ...defaultConfig?.config?.aws, ...data.config?.aws },
+						aws: {
+							...data?.config?.aws,
+							...defaultConfig?.config?.aws,
+							kms: {
+								...defaultConfig?.config?.aws?.kms,
+								...data.config?.aws?.kms,
+							},
+							ssm: {
+								...defaultConfig?.config?.aws?.ssm,
+								...data.config?.aws?.ssm,
+							},
+							secretsManager: {
+								...defaultConfig?.config?.aws?.secretsManager,
+								...data.config?.aws?.secretsManager,
+							},
+						},
 					},
 				},
 			};
@@ -61,8 +77,24 @@ export const getConfig = async (
 					...defaultConfig,
 					...data,
 					config: {
+						...data?.config,
 						...defaultConfig.config,
-						aws: { ...defaultConfig?.config?.aws, ...data.config?.aws },
+						aws: {
+							...data?.config?.aws,
+							...defaultConfig?.config?.aws,
+							kms: {
+								...defaultConfig?.config?.aws?.kms,
+								...data.config?.aws?.kms,
+							},
+							ssm: {
+								...defaultConfig?.config?.aws?.ssm,
+								...data.config?.aws?.ssm,
+							},
+							secretsManager: {
+								...defaultConfig?.config?.aws?.secretsManager,
+								...data.config?.aws?.secretsManager,
+							},
+						},
 					},
 				},
 			};

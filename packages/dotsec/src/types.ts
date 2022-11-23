@@ -1,3 +1,5 @@
+import { PutParameterRequest } from "@aws-sdk/client-ssm";
+
 // utility types
 export type DeepPartial<T> = T extends object
 	? {
@@ -38,16 +40,25 @@ export type DotsecConfig = {
 					| "RSAES_OAEP_SHA_256"
 					| "SYMMETRIC_DEFAULT";
 			};
+			ssm?: {
+				pathPrefix?: string;
+				parameterType?: "String" | "SecureString";
+			};
+			secretsManager?: {
+				pathPrefix?: string;
+			};
 		};
 	};
-	env?: {
+	variables?: {
 		[key: string]: {
-			skip?: boolean;
-			type?: "string" | "number" | "boolean" | "json";
-			sync?: {
-				ssm?: boolean;
-				secretsManager?: boolean;
-				githubSecrets?: boolean;
+			push?: {
+				aws?: {
+					ssm?:
+						| boolean
+						| (Omit<PutParameterRequest, "Name" | "Value"> & { Name?: string });
+					secretsManager?: boolean;
+				};
+				// githubSecrets?: boolean;
 			};
 		};
 	};
@@ -81,6 +92,18 @@ export type RunCommandOptions = GlobalCommandOptions & {
 	sec?: string;
 	keyAlias?: string;
 	region?: string;
+};
+
+export type PushCommandOptions = {
+	configFile: string;
+	verbose: false;
+	env: string | boolean;
+	sec: string | boolean;
+	yes: boolean;
+	awskeyAlias: string;
+	awsRegion?: string;
+	toAwsSsm?: boolean;
+	toAwsSecretsManager?: boolean;
 };
 
 export const isString = (value: unknown): value is string => {

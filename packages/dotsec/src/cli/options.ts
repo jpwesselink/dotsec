@@ -103,6 +103,34 @@ export const commandOptions: CommandOptions = {
 			],
 		},
 	},
+	push: {
+		inheritsFrom: ["dotsec"],
+		options: {
+			toAwsSsm: ["--to-aws-ssm, --toAwsSsm", "Push to AWS SSM"],
+			toAwsSecretsManager: [
+				"--to-aws-secrets-manager, --toAwsSecretsManager",
+				"Push to AWS Secrets Manager",
+			],
+
+			// toGitHubSecrets: [
+			// 	"--to-github-secrets, --toGitHubSecrets <toGitHubSecrets>",
+			// 	"Push to GitHub Secrets",
+			// ],
+
+			env: ["--env [env]", "Path to .env file"],
+			sec: ["--sec [sec]", "Path to .sec file"],
+			yes: ["--yes", "Skip confirmation prompts", false],
+			awsKeyAlias: [
+				"--aws-key-alias <awsKeyAlias>",
+				"AWS KMS key alias, overrides the value provided in dotsec.config (config.aws.kms.keyAlias)",
+				"alias/dotsec",
+			],
+			awsRegion: [
+				"--aws-region <awsRegion>",
+				"AWS region, overrides the value provided in dotsec.config (config.aws.region) and AWS_REGION",
+			],
+		},
+	},
 };
 
 const getInheritedOptions = (
