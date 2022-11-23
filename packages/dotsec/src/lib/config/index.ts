@@ -4,23 +4,16 @@ import { bundleRequire } from "bundle-require";
 import JoyCon from "joycon";
 
 import { loadJson } from "../json";
-import { defaultConfig } from "./constants";
-import { DotsecConfig, PartialConfig } from "./types";
+import { DotsecConfig, DotsecConfigAndSource } from "../../types";
+import { defaultConfig, DOTSEC_CONFIG_FILES } from "../../constants";
 
-export const getConfig = async (filename?: string): Promise<DotsecConfig> => {
+export const getConfig = async (
+	filename?: string,
+): Promise<DotsecConfigAndSource> => {
 	const cwd = process.cwd();
 	const configJoycon = new JoyCon();
 	const configPath = await configJoycon.resolve({
-		files: filename
-			? [filename]
-			: [
-					"dotsec.config.ts",
-					"dotsec.config.js",
-					"dotsec.config.cjs",
-					"dotsec.config.mjs",
-					"dotsec.config.json",
-					"package.json",
-			  ],
+		files: filename ? [filename] : [...DOTSEC_CONFIG_FILES, "package.json"],
 		cwd,
 		stopDir: path.parse(cwd).root,
 		packageKey: "dotsec",
@@ -30,7 +23,7 @@ export const getConfig = async (filename?: string): Promise<DotsecConfig> => {
 	}
 	if (configPath) {
 		if (configPath.endsWith(".json")) {
-			const rawData = (await loadJson(configPath)) as PartialConfig;
+			const rawData = (await loadJson(configPath)) as Partial<DotsecConfig>;
 
 			let data: Partial<DotsecConfig>;
 
@@ -44,28 +37,37 @@ export const getConfig = async (filename?: string): Promise<DotsecConfig> => {
 			}
 
 			return {
-				...defaultConfig,
-				...data,
-				aws: { ...defaultConfig.aws, ...data.aws },
+				source: "json",
+				contents: {
+					...defaultConfig,
+					...data,
+					config: {
+						...defaultConfig.config,
+						aws: { ...defaultConfig?.config?.aws, ...data.config?.aws },
+					},
+				},
+			};
+		} else if (configPath.endsWith(".ts")) {
+			const bundleRequireResult = await bundleRequire({
+				filepath: configPath,
+			});
+			const data = (bundleRequireResult.mod.dotsec ||
+				bundleRequireResult.mod.default ||
+				bundleRequireResult.mod) as Partial<DotsecConfig>;
+
+			return {
+				source: "ts",
+				contents: {
+					...defaultConfig,
+					...data,
+					config: {
+						...defaultConfig.config,
+						aws: { ...defaultConfig?.config?.aws, ...data.config?.aws },
+					},
+				},
 			};
 		}
-
-		const config = await bundleRequire({
-			filepath: configPath,
-		});
-
-		const retrievedConfig =
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-			(config.mod.dotsec as Partial<DotsecConfig>) ||
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-			(config.mod.default as Partial<DotsecConfig>) ||
-			config.mod;
-		return {
-			...defaultConfig,
-			// eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-			...retrievedConfig,
-		};
 	}
 
-	return { ...defaultConfig };
+	return { source: "defaultConfig", contents: defaultConfig };
 };

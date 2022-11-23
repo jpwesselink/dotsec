@@ -1,2 +1,3 @@
-export default () => {};
-export { DotsecConfig as Config, PartialConfig } from "./lib/config-old";
+export type { DotsecConfig as Dotsec } from "./types";
+import dotsec from "./dotsec";
+export default dotsec;

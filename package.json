@@ -3,14 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "workspaces": [
-    "./packages/*"
+    "./packages/**"
   ],
   "scripts": {
     "build": "lerna run build",
     "postinstall": "lerna bootstrap",
-    "lint": "eslint .",
     "prepare": "husky install",
-    "test": "jest --coverage",
     "packages/dotsec": "lerna exec --scope dotsec -- yarn"
   },
   "devDependencies": {
@@ -18,22 +16,11 @@
     "@commitlint/config-conventional": "^16.2.1",
     "@commitlint/config-lerna-scopes": "^16.2.1",
     "@types/node": "*",
-    "@typescript-eslint/eslint-plugin": "^5.11.0",
-    "@typescript-eslint/parser": "^5.11.0",
     "esbuild": "*",
     "esbuild-runner": "^2.2.1",
-    "eslint": "^8.9.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-config-airbnb-typescript": "^16.1.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-import-resolver-typescript": "^2.5.0",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-unused-imports": "^2.0.0",
     "husky": "^7.0.4",
-    "jest": "~27.5.1",
     "lerna": "^4.0.0",
-    "prettier": "~2.5.1",
+    "rome": "^10.0.1",
     "typescript": "^4.5.5"
   }
 }

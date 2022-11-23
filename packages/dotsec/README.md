@@ -1,105 +1,116 @@
 # dotsec
 
-Secure dot env. Encrypts your .env so you can safely store it in your project.
+Like dotenv, but encrypted.
+
+Encrypts your .env file with the AWS Encryption SDK so you can safely commit it to your repository.
+
+## Features
+
+- Encryption of .env files to .sec files.
+- Decryption of .sec files to .env files.
+- Run a command with the values of a .env file in its environment.
+- Run a command with the values of a .sec file in its environment.
+
+## Requirements
+
+- For initialisation enough credentials for creating a KMS key, and alias.
+- For usage enough credentials for using the KMS key to encrypt and/or decrypt.
+- An AWS KMS key with an alias.
 
 ## Usage
 
+If you don't have an AWS KMS key with an alias, you can create one with the following command:
+
+```sh
+aws kms create-key --description "Dotsec key" --region eu-west-1
+```
+
+Take not of the `KeyMetadata.KeyId` value, and create an alias for it:
+
+> Note: You are free to pick any allowed alias name.
+
+```sh
+aws kms create-alias --alias-name alias/dotsec --target-key-id <key-id>
+```
+
 ### Execute a command and use the values of a .env file in its environment
 
-```sh
-npx dotsec --env-file .env {command}
-```
-
-This command also supports injecting AWS assumed role credentials into the process environment.
-
-You can specify the ARN of the role to assume in three ways:
-
-- By adding the `--aws-assume-role-arn` flag
-- By setting the `AWS_ASSUME_ROLE_ARN` environment variable
-- By adding the `AWS_ASSUME_ROLE_ARN` environment variable to your target `.env` file
-
-#### By adding the `--aws-assume-role-arn` flag
+Create a .env file if you don't have one already, and add some values:
 
 ```sh
-npx dotsec --env-file .env --aws-assume-role-arn arn:aws:iam::123456789012:role/special-role {command}
+echo "MY_FANCY_ENV_VAR='yes yes yallzies'\nHEY_HO='Let\'s go'" > .env
 ```
 
-#### By setting the `AWS_ASSUME_ROLE_ARN` environment variable
+The following command will create an encrypted version of the `.env` file, and store it in a file called `.sec`. It will also create a config file called `dotsec.config.ts` which contains the KMS key alias, and AWS region. (Note: you don't have to add the key alias and region to the config file, you can also pass them as options to the dotsec aws sub command. See `dotsec init aws --help` for more information.)
 
 ```sh
-AWS_ASSUME_ROLE_ARN=arn:aws:iam::123456789012:role/special-role npx dotsec --env-file .env {command}
+npx dotsec init --aws-region eu-west-1 [--aws-key-alias alias/dotsec]
 ```
 
-#### By adding the `AWS_ASSUME_ROLE_ARN` environment variable to your target `.env` file
+The following files will be created:
 
-...
-AWS_ASSUME_ROLE_ARN=arn:aws:iam::123456789012:role/special-role
-...
+- `.sec` - The encrypted version of the `.env` file.
+- `dotsec.config.ts` - The config file containing the KMS key alias and AWS region.
+
+### Add files to Git
+
+Add the `.sec` and `dotsec.config.ts` files to your repository, and commit these accordingly.
+
+### Run a process with your .env file
 
 ```sh
-npx dotsec --env-file .env {command}
+npx dotsec run --env .env command env
 ```
 
-Please refer to `dotsec help` for more information on other command line options.
-
-#### Secure usage
-
-Create a user managed AWS KMS key, add an alias. Refer to the AWS documentation for [creating keys](https://docs.aws.amazon.com/kms/latest/developerguide/create-keys.html) and [managing aliases](https://docs.aws.amazon.com/kms/latest/developerguide/alias-manage.html#alias-create)
-
-> the default key alias is set to `alias/top-secret`
-
-### Execute a command and use the decrypted values of a .sec file in its environment
+### Run a process with your .sec file
 
 ```sh
-npx dotsec {command}
+npx dotsec run --sec .sec command env
 ```
 
-#### Other commands
+For more options see `dotsec run --help`.
 
-### Encrypting a `.env` file into a `.sec` file
+### Decrypt a .sec file to .env
 
 ```sh
-npx dotsec encrypt-env
+npx dotsec decrypt
 ```
 
-### Decrypting a `.sec` file into a `.env` file
+For more options see `dotsec decrypt --help`.
+
+### Encrypt a .env file to .sec
 
 ```sh
-npx dotsec decrypt-env
+npx dotsec encrypt
 ```
 
-### Using a `.sec` file as environment variables
-
-```sh
-npx dotsec node index.js
-```
-
-## Using json secrets
-
-### Encrypting a `secrets.json` file into a `secrets.encrypted.json` file
-
-```sh
-npx dotsec encrypt-secrets-json
-```
-
-### Decrypting a `secrets.encrypted.json` file into a `secrets.json` file
-
-```sh
-npx dotsec decrypt-secrets-json
-```
-
-### Offload a `secrets.encrypted.json` file to SSM
-
-```sh
-npx dotsec offload-secrets-json-to-ssm
-```
+For more options see `dotsec encrypt --help`.
 
 ### FAQ
 
-#### Is it safe to commit a `.sec` file alongside your code?
+#### Is it safe to commit a `.sec` and `dotsec.config.ts` file alongside your code?
 
-Yes it is. The encryption key is managed by AWS, as long as you audit which principals can encrypt and decrypt you're good.
+Yes it is. But it is up to you to make sure that access to the KMS key is restricted to the people who need to decrypt and/or encrypt the `.sec` file.
 
 #### Should I use this in production?
 
 We do, however, since this package is relatively new, I don't think you should.
+
+## Roadmap
+
+- [ ] Write some tests already.
+- [ ] Add support in-code use like `dotsec.config()`
+- [ ] Add support for Node preload modules like `node -r dotsec/register index.js`
+- [ ] Add watcher for `.env` file changes and automatically encrypt
+- [ ] Write guide on postinstall for npm/yarn/pnpm
+- [ ] Add chunking for encoding larger files with assymetric keys. Current limit is 4kb.
+- [ ] Add support for other encryption SDKs like GCP KMS, Azure Key Vault, etc.
+- [ ] Split up dotsec package in multiple packages, one for each SDK.
+- [ ] Add support for pushing entries to AWS Systems Manager Parameter Store.
+- [ ] Add support for pulling entries to AWS Secrets Manager.
+- [ ] Add support for pulling entries to GitHub actions secrets.
+
+## Limitations
+
+- The only supported encryption SDK is the AWS Encryption SDK. For now.
+- Assymetric keys are supported, but the encrypted file size is limited to the payload size of the key. Until chunking is implemented, that is.
