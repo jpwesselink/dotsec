@@ -1,6 +1,7 @@
 {
     "name": "@dotsec/implementation",
-    "version": "2.0.0-alpha.0",
+    "version": "3.0.0-alpha.0",
+    "private": true,
     "description": "",
     "scripts": {
         "dev": "tsup --watch ./src --onSuccess \"node dist/index.js\"",
@@ -12,6 +13,7 @@
         "typescript": "~4.5.5"
     },
     "dependencies": {
-        "dotsec": "file:../dotsec"
-    }
+        "dotsec": "^3.0.0-alpha.0"
+    },
+    "gitHead": "3d56ad7ed965f26f587265c668b63024b9908b6d"
 }
