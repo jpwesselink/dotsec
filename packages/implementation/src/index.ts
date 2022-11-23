@@ -1,5 +1,4 @@
 import dotsec from "dotsec";
-import path from "node:path";
 import { dotsec as dotsecConfig } from "../../../dotsec.config";
 
 void dotsec

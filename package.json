@@ -9,7 +9,8 @@
     "build": "lerna run build",
     "postinstall": "lerna bootstrap",
     "prepare": "husky install",
-    "packages/dotsec": "lerna exec --scope dotsec -- yarn"
+    "packages/dotsec": "lerna exec --scope dotsec -- yarn",
+    "docs": "typedoc --out ./docs/api --readme none --gitRevision $(git rev-parse --abbrev-ref HEAD) --entryPointStrategy Packages packages/dotsec"
   },
   "devDependencies": {
     "@commitlint/cli": "^16.2.1",
@@ -21,6 +22,8 @@
     "husky": "^7.0.4",
     "lerna": "^4.0.0",
     "rome": "^10.0.1",
+    "typedoc": "^0.23.21",
+    "typedoc-plugin-markdown": "^3.13.6",
     "typescript": "^4.5.5"
   }
 }

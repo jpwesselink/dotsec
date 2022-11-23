@@ -4,7 +4,7 @@
             "es2020"
         ],
         "removeComments": true,
-        "moduleResolution": "node",
+        "moduleResolution": "nodenext",
         "module": "ES2022",
         "noUnusedLocals": true,
         "noUnusedParameters": true,
