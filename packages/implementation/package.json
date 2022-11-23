@@ -1,6 +1,6 @@
 {
     "name": "@dotsec/implementation",
-    "version": "3.0.0-alpha.2",
+    "version": "1.0.0-alpha.6",
     "private": true,
     "description": "",
     "scripts": {
