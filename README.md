@@ -148,17 +148,15 @@ We do, however, since this package is relatively new, I don't think you should.
 
 ## Roadmap
 
-- [ ] Write some tests already.
-- [ ] Add support in-code use like `dotsec.config()`
-- [ ] Add support for Node preload modules like `node -r dotsec/register index.js`
-- [ ] Add watcher for `.env` file changes and automatically encrypt
-- [ ] Write guide on postinstall for npm/yarn/pnpm
-- [ ] Add chunking for encoding larger files with assymetric keys. Current limit is 4kb.
-- [ ] Add support for other encryption SDKs like GCP KMS, Azure Key Vault, etc.
-- [ ] Split up dotsec package in multiple packages, one for each SDK.
-- [x] Add support for pushing entries to AWS Systems Manager Parameter Store.
-- [x] Add support for pulling entries to AWS Secrets Manager.
-- [ ] Add support for pulling entries to GitHub actions secrets.
+- Write some tests already.
+- Add support in-code use like `dotsec.config()`
+- Add support for Node preload modules like `node -r dotsec/register index.js`
+- Add watcher for `.env` file changes and automatically encrypt
+- Write guide on postinstall for npm/yarn/pnpm
+- Add chunking for encoding larger files with assymetric keys. Current limit is 4kb.
+- Add support for other encryption SDKs like GCP KMS, Azure Key Vault, etc.
+- Split up dotsec package in multiple packages, one for each SDK.
+- Add support for pulling entries to GitHub actions secrets.
 
 ## Limitations
 
