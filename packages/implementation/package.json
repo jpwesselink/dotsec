@@ -1,6 +1,6 @@
 {
     "name": "@dotsec/implementation",
-    "version": "3.0.0-alpha.0",
+    "version": "3.0.0-alpha.1",
     "private": true,
     "description": "",
     "scripts": {
@@ -13,7 +13,7 @@
         "typescript": "~4.5.5"
     },
     "dependencies": {
-        "dotsec": "^3.0.0-alpha.0"
+        "dotsec": "^3.0.0-alpha.1"
     },
     "gitHead": "3d56ad7ed965f26f587265c668b63024b9908b6d"
 }
