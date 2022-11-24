@@ -76,7 +76,7 @@ const addInitProgram = async (program: Command) => {
 				const patchedConfigTemplate = patchConfigFile({
 					configFile: path.resolve(
 						__dirname,
-						"../src/templates/dotsec.config.ts",
+						"../../src/templates/dotsec.config.ts",
 					),
 					config: {
 						aws: {

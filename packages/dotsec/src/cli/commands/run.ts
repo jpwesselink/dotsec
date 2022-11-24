@@ -1,7 +1,6 @@
 import fs from "node:fs";
 
 import { Command } from "commander";
-import spawn from "cross-spawn";
 import { parse } from "dotenv";
 
 import { DOTSEC_DEFAULT_AWS_KMS_KEY_ALIAS } from "../../constants";
@@ -9,6 +8,7 @@ import { awsEncryptionEngineFactory } from "../../lib/aws/AwsKmsEncryptionEngine
 import { RunCommandOptions } from "../../types";
 import { setProgramOptions } from "../options";
 import { getConfig } from "../../lib/config";
+import { spawnSync } from "node:child_process";
 const addRunProgam = (program: Command) => {
 	const subProgram = program
 		.command("run <command...>")
@@ -58,7 +58,7 @@ const addRunProgam = (program: Command) => {
 				if (envContents) {
 					const dotenvVars = parse(envContents);
 					const [userCommand, ...userCommandArgs] = commands;
-					spawn(userCommand, [...userCommandArgs], {
+					spawnSync(userCommand, [...userCommandArgs], {
 						stdio: "inherit",
 						shell: false,
 						env: {
