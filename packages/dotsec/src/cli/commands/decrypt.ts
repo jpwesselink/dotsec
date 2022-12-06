@@ -1,53 +1,75 @@
 import { Command } from "commander";
-import { awsEncryptionEngineFactory } from "../../lib/aws/AwsKmsEncryptionEngine";
 import {
 	promptOverwriteIfFileExists,
 	readContentsFromFile,
 	writeContentsToFile,
 } from "../../lib/io";
-import { EncryptionEngine, Init2CommandOptions } from "../../types";
-
-import { getConfig } from "../../lib/config";
-import { setProgramOptions } from "../options";
+import { CliPluginDecryptHandler } from "../../lib/plugin";
+import { Decrypt2CommandOptions } from "../../types";
 import { strong } from "../../utils/logger";
+import { setProgramOptions } from "../options";
 
-const addDecryptProgram = async (program: Command) => {
+type Formats = {
+	env?: string;
+	awsKeyAlias?: string;
+} & Record<string, unknown>;
+
+const addEncryptProgram = async (
+	program: Command,
+	options: {
+		decryption: CliPluginDecryptHandler[];
+	},
+) => {
 	const subProgram = program
 		.enablePositionalOptions()
 		.passThroughOptions()
 		.command("decrypt")
-		.action(async (_options, command: Command) => {
-			const {
-				configFile,
-				verbose,
-				env: dotenvFilename,
-				sec: dotsecFilename,
-				awskeyAlias,
-				awsRegion,
-				yes,
-			} = command.optsWithGlobals<Init2CommandOptions>();
-
-			// get dotsec config
-			const { contents: dotsecConfig } = await getConfig(configFile);
+		.action(async (_options: Formats, command: Command) => {
 			try {
-				let encryptionEngine: EncryptionEngine;
+				const {
+					// verbose,
+					env: dotenvFilename,
+					sec: dotsecFilename,
+					yes,
+				} = command.optsWithGlobals<Decrypt2CommandOptions>();
 
-				encryptionEngine = await awsEncryptionEngineFactory({
-					verbose,
-					region:
-						awsRegion ||
-						process.env.AWS_REGION ||
-						dotsecConfig.config?.aws?.region,
-					kms: {
-						keyAlias: awskeyAlias || dotsecConfig?.config?.aws?.kms?.keyAlias,
-					},
-				});
+				const pluginCliDecrypt = Object.keys(_options).reduce<
+					CliPluginDecryptHandler | undefined
+				>((acc, key) => {
+					if (!acc) {
+						return options.decryption.find((encryption) => {
+							return encryption.triggerOption === key;
+						});
+					}
+					return acc;
+				}, undefined);
 
+				if (!pluginCliDecrypt) {
+					throw new Error(
+						`No decryption plugin found, available decryption engine(s): ${options.decryption
+							.map((e) => `--${e.triggerOption}`)
+							.join(", ")}`,
+					);
+				}
+
+				const allOptionKeys = [
+					...Object.keys(pluginCliDecrypt.options || {}),
+					...Object.keys(pluginCliDecrypt.requiredOptions || {}),
+				];
+
+				const allOptionsValues = Object.fromEntries(
+					allOptionKeys.map((key) => {
+						return [key, _options[key]];
+					}),
+				);
+				console.log("dotsecFilename", dotsecFilename);
 				// get current dot env file
 				const dotsecString = await readContentsFromFile(dotsecFilename);
 
-				// encrypt
-				const plaintext = await encryptionEngine.decrypt(dotsecString);
+				const plaintext = await pluginCliDecrypt.handler({
+					ciphertext: dotsecString,
+					...allOptionsValues,
+				});
 
 				const dotenvOverwriteResponse = await promptOverwriteIfFileExists({
 					filePath: dotenvFilename,
@@ -64,14 +86,32 @@ const addDecryptProgram = async (program: Command) => {
 						)} file to ${strong(dotenvFilename)}`,
 					);
 				}
+
+				console.log("plaintext", plaintext);
 			} catch (e) {
-				command.error(e);
+				console.error(strong(e.message));
+				command.help();
 			}
 		});
 
+	options.decryption.map((decryption) => {
+		const { options, requiredOptions } = decryption;
+		if (options) {
+			Object.values(options).map((option) => {
+				// @ts-ignore
+				subProgram.option(...option);
+			});
+		}
+		if (requiredOptions) {
+			Object.values(requiredOptions).map((requiredOption) => {
+				// @ts-ignore
+				subProgram.option(...requiredOption);
+			});
+		}
+	});
 	setProgramOptions(subProgram);
 
 	return subProgram;
 };
 
-export default addDecryptProgram;
+export default addEncryptProgram;

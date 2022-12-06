@@ -33,27 +33,17 @@ const addPushProgram = async (program: Command) => {
 				yes,
 				toAwsSsm,
 				toAwsSecretsManager,
+				toGitHubActionsSecrets,
 			} = command.optsWithGlobals<PushCommandOptions>();
-
-			if (!(toAwsSsm || toAwsSecretsManager)) {
+			if (!(toAwsSsm || toAwsSecretsManager || toGitHubActionsSecrets)) {
 				throw new Error(
-					"You must specify at least one of --to-aws-ssm or --to-aws-secrets-manager",
+					"You must specify at least one of --to-aws-ssm, --to-aws-secrets-manager or --to-github-actions-secrets",
 				);
 			}
 			const { contents: dotsecConfig } = await getConfig(configFile);
 
-			let encryptionEngine: EncryptionEngine;
 			let envContents: string | undefined;
-			encryptionEngine = await awsEncryptionEngineFactory({
-				verbose,
-				region:
-					awsRegion ||
-					process.env.AWS_REGION ||
-					dotsecConfig.config?.aws?.region,
-				kms: {
-					keyAlias: awskeyAlias || dotsecConfig?.config?.aws?.kms?.keyAlias,
-				},
-			});
+
 			if (env) {
 				const dotenvFilename = isBoolean(env)
 					? DOTSEC_DEFAULT_DOTENV_FILENAME
@@ -64,6 +54,17 @@ const addPushProgram = async (program: Command) => {
 					? DOTSEC_DEFAULT_DOTSEC_FILENAME
 					: sec;
 				const dotSecContents = fs.readFileSync(dotsecFilename, "utf8");
+				const encryptionEngine = await awsEncryptionEngineFactory({
+					verbose,
+					region:
+						awsRegion ||
+						process.env.AWS_REGION ||
+						dotsecConfig.config?.aws?.region,
+					kms: {
+						keyAlias: awskeyAlias || dotsecConfig?.config?.aws?.kms?.keyAlias,
+					},
+				});
+
 				envContents = await encryptionEngine.decrypt(dotSecContents);
 			} else {
 				throw new Error('Must provide either "--env" or "--sec"');
@@ -183,7 +184,6 @@ ${updateSecretCommands
 
 						confirmations.push(confirmUpdate);
 					}
-
 					if (createSecretCommands.length > 0) {
 						const { confirm: confirmCreate } = await promptConfirm({
 							message: `Are you sure you want to create the following variables to AWS SSM Secrets Manager?
@@ -195,12 +195,34 @@ ${createSecretCommands
 
 						confirmations.push(confirmCreate);
 					}
-
-					if (!confirmations.find((c) => c === false)) {
-						console.log("pushing to AWS Secrets Manager");
+					if (confirmations.find((c) => c === false) === undefined) {
+						console.log("xpushing to AWS Secrets Manager");
 
 						await push();
 					}
+				}
+
+				if (toGitHubActionsSecrets) {
+					// which env vars should we push to github actions secrets?
+					const githubActionsSecrets = Object.entries(envObject).reduce<
+						{ name: string; value: string }[]
+					>((acc, [key, value]) => {
+						if (dotsecConfig.variables?.[key]) {
+							const entry = dotsecConfig.variables?.[key];
+							if (entry) {
+								if (entry.push?.github?.actionsSecrets) {
+									acc.push({
+										name: key,
+										value,
+									});
+								}
+							}
+						}
+
+						return acc;
+					}, []);
+
+					console.log("githubActionsSecrets", githubActionsSecrets);
 				}
 			} catch (e) {
 				command.error(e);

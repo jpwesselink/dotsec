@@ -44,6 +44,10 @@ export const getConfig = async (
 					config: {
 						...data?.config,
 						...defaultConfig.config,
+						github: {
+							...data?.config?.github,
+							...defaultConfig?.config?.github,
+						},
 						aws: {
 							...data?.config?.aws,
 							...defaultConfig?.config?.aws,
@@ -79,6 +83,10 @@ export const getConfig = async (
 					config: {
 						...data?.config,
 						...defaultConfig.config,
+						github: {
+							...data?.config?.github,
+							...defaultConfig?.config?.github,
+						},
 						aws: {
 							...data?.config?.aws,
 							...defaultConfig?.config?.aws,

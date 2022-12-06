@@ -1,0 +1,25 @@
+$ tsup
+ CLI  Building entry: src/cli/index.ts, src/index.ts
+ CLI  tsup v4.14.0
+ CLI  Using tsup config: /Users/jp/projects/dotsec/packages/dotsec/tsup.config.ts
+ CLI  Target: node12
+ CLI  Cleaning output folder
+ CJS  Build start
+ ESM  Build start
+ ESM  Build success in 14ms
+ CJS  Build success in 30ms
+ DTS  Build start
+error TS6053: File '/Users/jp/projects/dotsec/packages/dotsec-cli/dist/index.d.ts' not found.
+  The file is in the program because:
+    Root file specified for compilation
+
+ DTS  Build error
+Error: Failed to compile. Check the logs above.
+    at error (/Users/jp/projects/dotsec/node_modules/rollup/dist/shared/rollup.js:198:30)
+    at throwPluginError (/Users/jp/projects/dotsec/node_modules/rollup/dist/shared/rollup.js:21718:12)
+    at Object.error (/Users/jp/projects/dotsec/node_modules/rollup/dist/shared/rollup.js:22672:20)
+    at Object.error (/Users/jp/projects/dotsec/node_modules/rollup/dist/shared/rollup.js:21895:42)
+    at Object.transform (/Users/jp/projects/dotsec/node_modules/tsup/dist/rollup.js:6014:20)
+    at /Users/jp/projects/dotsec/node_modules/rollup/dist/shared/rollup.js:22879:40
+error Command failed with exit code 1.
+info Visit https://yarnpkg.com/en/docs/cli/run for documentation about this command.

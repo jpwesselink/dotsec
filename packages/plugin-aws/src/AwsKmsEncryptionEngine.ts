@@ -4,7 +4,7 @@ import {
 	EncryptCommand,
 	KMSClient,
 } from "@aws-sdk/client-kms";
-import { EncryptionEngineFactory } from "../../types";
+import { EncryptionEngineFactory } from "dotsec";
 import { handleCredentialsAndRegion } from "./handleCredentialsAndRegion";
 
 export type AwsEncryptionEngineFactory = EncryptionEngineFactory<

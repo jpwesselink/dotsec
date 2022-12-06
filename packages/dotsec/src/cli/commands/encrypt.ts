@@ -1,53 +1,73 @@
 import { Command } from "commander";
-import { awsEncryptionEngineFactory } from "../../lib/aws/AwsKmsEncryptionEngine";
 import {
 	promptOverwriteIfFileExists,
 	readContentsFromFile,
 	writeContentsToFile,
 } from "../../lib/io";
-import { EncryptionEngine, Init2CommandOptions } from "../../types";
-
-import { getConfig } from "../../lib/config";
-import { setProgramOptions } from "../options";
+import { CliPluginEncryptHandler } from "../../lib/plugin";
+import { Encrypt2CommandOptions } from "../../types";
 import { strong } from "../../utils/logger";
+import { setProgramOptions } from "../options";
 
-const addEncryptProgram = async (program: Command) => {
+type Formats = {
+	env?: string;
+	awsKeyAlias?: string;
+} & Record<string, unknown>;
+
+const addEncryptProgram = async (
+	program: Command,
+	options: {
+		encryption: CliPluginEncryptHandler[];
+	},
+) => {
 	const subProgram = program
 		.enablePositionalOptions()
 		.passThroughOptions()
 		.command("encrypt")
-		.action(async (_options, command: Command) => {
-			const {
-				verbose,
-				configFile,
-				env: dotenvFilename,
-				sec: dotsecFilename,
-				awskeyAlias,
-				awsRegion,
-				yes,
-			} = command.optsWithGlobals<Init2CommandOptions>();
-
-			// get dotsec config
-			const { contents: dotsecConfig } = await getConfig(configFile);
+		.action(async (_options: Formats, command: Command) => {
 			try {
-				let encryptionEngine: EncryptionEngine;
+				const {
+					// verbose,
+					env: dotenvFilename,
+					sec: dotsecFilename,
+					yes,
+				} = command.optsWithGlobals<Encrypt2CommandOptions>();
+				const pluginCliEncrypt = Object.keys(_options).reduce<
+					CliPluginEncryptHandler | undefined
+				>((acc, key) => {
+					if (!acc) {
+						return options.encryption.find((encryption) => {
+							return encryption.triggerOption === key;
+						});
+					}
+					return acc;
+				}, undefined);
 
-				encryptionEngine = await awsEncryptionEngineFactory({
-					verbose,
-					region:
-						awsRegion ||
-						process.env.AWS_REGION ||
-						dotsecConfig.config?.aws?.region,
-					kms: {
-						keyAlias: awskeyAlias || dotsecConfig?.config?.aws?.kms?.keyAlias,
-					},
-				});
+				if (!pluginCliEncrypt) {
+					throw new Error(
+						`No encryption plugin found, available encryption engine(s): ${options.encryption
+							.map((e) => `--${e.triggerOption}`)
+							.join(", ")}`,
+					);
+				}
 
-				// get current dot env file
+				const allOptionKeys = [
+					...Object.keys(pluginCliEncrypt.options || {}),
+					...Object.keys(pluginCliEncrypt.requiredOptions || {}),
+				];
+
+				const allOptionsValues = Object.fromEntries(
+					allOptionKeys.map((key) => {
+						return [key, _options[key]];
+					}),
+				);
+
 				const dotenvString = await readContentsFromFile(dotenvFilename);
 
-				// encrypt
-				const cipherText = await encryptionEngine.encrypt(dotenvString);
+				const cipherText = await pluginCliEncrypt.handler({
+					plaintext: dotenvString,
+					...allOptionsValues,
+				});
 
 				const dotsecOverwriteResponse = await promptOverwriteIfFileExists({
 					filePath: dotsecFilename,
@@ -65,10 +85,26 @@ const addEncryptProgram = async (program: Command) => {
 					);
 				}
 			} catch (e) {
-				command.error(e);
+				console.error(strong(e.message));
+				command.help();
 			}
 		});
 
+	options.encryption.map((encryption) => {
+		const { options, requiredOptions } = encryption;
+		if (options) {
+			Object.values(options).map((option) => {
+				// @ts-ignore
+				subProgram.option(...option);
+			});
+		}
+		if (requiredOptions) {
+			Object.values(requiredOptions).map((requiredOption) => {
+				// @ts-ignore
+				subProgram.option(...requiredOption);
+			});
+		}
+	});
 	setProgramOptions(subProgram);
 
 	return subProgram;

@@ -7,25 +7,16 @@ import {
 } from "../../lib/io";
 import { EncryptionEngine, Init2CommandOptions } from "../../types";
 
-import path from "node:path";
-import { patchConfigFile } from "../../lib/transformer";
+import { getConfig } from "../../lib/config/index";
 import { setProgramOptions } from "../options";
 import { strong } from "../../utils/logger";
-import {
-	defaultConfig,
-	DOTSEC_DEFAULT_AWS_KMS_KEY_ALIAS,
-} from "../../constants";
-type Formats = {
-	env?: string;
-	awsKeyAlias?: string;
-};
 
-const addInitProgram = async (program: Command) => {
+const addEncryptOldProgram = async (program: Command) => {
 	const subProgram = program
 		.enablePositionalOptions()
 		.passThroughOptions()
-		.command("init")
-		.action(async (_options: Formats, command: Command) => {
+		.command("encrypt")
+		.action(async (_options, command: Command) => {
 			const {
 				verbose,
 				configFile,
@@ -35,8 +26,9 @@ const addInitProgram = async (program: Command) => {
 				awsRegion,
 				yes,
 			} = command.optsWithGlobals<Init2CommandOptions>();
-			// get dotsec config
 
+			// get dotsec config
+			const { contents: dotsecConfig } = await getConfig(configFile);
 			try {
 				let encryptionEngine: EncryptionEngine;
 
@@ -45,9 +37,9 @@ const addInitProgram = async (program: Command) => {
 					region:
 						awsRegion ||
 						process.env.AWS_REGION ||
-						defaultConfig.config?.aws?.region,
+						dotsecConfig.config?.aws?.region,
 					kms: {
-						keyAlias: awskeyAlias || defaultConfig?.config?.aws?.kms?.keyAlias,
+						keyAlias: awskeyAlias || dotsecConfig?.config?.aws?.kms?.keyAlias,
 					},
 				});
 
@@ -66,40 +58,11 @@ const addInitProgram = async (program: Command) => {
 					dotsecOverwriteResponse.overwrite === true
 				) {
 					await writeContentsToFile(dotsecFilename, cipherText);
-					// todo: fix type
 					console.log(
 						`Wrote encrypted contents of ${strong(
 							dotenvFilename,
-						)} contents file to ${strong(dotsecFilename)}`,
+						)} file to ${strong(dotsecFilename)}`,
 					);
-				}
-
-				const patchedConfigTemplate = patchConfigFile({
-					configFile: path.resolve(
-						__dirname,
-						"../../src/templates/dotsec.config.ts",
-					),
-					config: {
-						aws: {
-							kms: {
-								keyAlias: awskeyAlias || DOTSEC_DEFAULT_AWS_KMS_KEY_ALIAS,
-							},
-							region: awsRegion || process.env.AWS_REGION,
-						},
-					},
-				});
-				const dotsecConfigOverwriteResponse = await promptOverwriteIfFileExists(
-					{
-						filePath: configFile,
-						skip: yes,
-					},
-				);
-				if (
-					dotsecConfigOverwriteResponse === undefined ||
-					dotsecConfigOverwriteResponse.overwrite === true
-				) {
-					await writeContentsToFile(configFile, patchedConfigTemplate);
-					console.log(`Wrote config file to ${strong(configFile)}`);
 				}
 			} catch (e) {
 				command.error(e);
@@ -111,4 +74,4 @@ const addInitProgram = async (program: Command) => {
 	return subProgram;
 };
 
-export default addInitProgram;
+export default addEncryptOldProgram;

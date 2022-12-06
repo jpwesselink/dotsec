@@ -13,11 +13,11 @@ import { CliPluginRunHandler } from "../../lib/plugin";
 const addRunProgam = (
 	program: Command,
 	options?: {
-		decryption?: CliPluginRunHandler[];
+		run?: CliPluginRunHandler[];
 	},
 ) => {
 	const subProgram = program
-		.command("run <command...>")
+		.command("run2 <command...>")
 		.allowUnknownOption()
 		.description(
 			"Run a command in a separate process and populate env with decrypted .env or encrypted .sec values",
@@ -82,6 +82,21 @@ const addRunProgam = (
 		);
 
 	setProgramOptions(subProgram, "run");
+	options?.run?.map((run) => {
+		const { options, requiredOptions } = run;
+		if (options) {
+			Object.values(options).map((option) => {
+				// @ts-ignore
+				subProgram.option(...option);
+			});
+		}
+		if (requiredOptions) {
+			Object.values(requiredOptions).map((requiredOption) => {
+				// @ts-ignore
+				subProgram.option(...requiredOption);
+			});
+		}
+	});
 
 	return subProgram;
 };
