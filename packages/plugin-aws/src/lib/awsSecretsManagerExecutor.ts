@@ -1,14 +1,14 @@
+import { handleCredentialsAndRegion } from "../utils/handleCredentialsAndRegion";
 import {
 	CreateSecretCommand,
-	DescribeSecretCommand,
-	UpdateSecretCommand,
 	CreateSecretRequest,
-	SecretsManagerClient,
+	DescribeSecretCommand,
 	ResourceNotFoundException,
+	SecretsManagerClient,
+	UpdateSecretCommand,
 } from "@aws-sdk/client-secrets-manager";
-import { handleCredentialsAndRegion } from "./handleCredentialsAndRegion";
 
-export const AwsSecretsManager = async (options?: {
+export const createAwsSecretsManagerExecutor = async (options?: {
 	region?: string;
 }) => {
 	const { region } = options || {};
@@ -25,10 +25,20 @@ export const AwsSecretsManager = async (options?: {
 	});
 
 	return {
-		async push(createSecretRequests: CreateSecretRequest[]) {
+		async createOrUpdateSecrets(
+			createSecretRequests: (CreateSecretRequest & {
+				envVariableName: string;
+			})[],
+		) {
 			const createSecretCommands: CreateSecretCommand[] = [];
-			console.log("createSecretReddquests", createSecretRequests);
 			const updateSecretCommands: UpdateSecretCommand[] = [];
+			const createOrUpdateSecretsOverview: {
+				envVariableName: string;
+				operation: string;
+				name: string;
+				region: string;
+			}[] = [];
+
 			for (const createSecretRequest of createSecretRequests) {
 				// create secret
 				// check if secret exists
@@ -37,7 +47,6 @@ export const AwsSecretsManager = async (options?: {
 				});
 				try {
 					const result = await secretsManagerClient.send(describeSecretCommand);
-					console.log("got one");
 					// update secret
 					updateSecretCommands.push(
 						new UpdateSecretCommand({
@@ -45,17 +54,31 @@ export const AwsSecretsManager = async (options?: {
 							SecretString: createSecretRequest.SecretString,
 						}),
 					);
+
+					createOrUpdateSecretsOverview.push({
+						envVariableName: createSecretRequest.envVariableName,
+						operation: "update",
+						name: createSecretRequest.Name as string,
+						region: region || regionAndOrigin.value,
+					});
 				} catch (e) {
 					if (e instanceof ResourceNotFoundException) {
 						// create secret
-						console.log("got one");
-
 						createSecretCommands.push(
 							new CreateSecretCommand({
 								Name: createSecretRequest.Name,
 								SecretString: createSecretRequest.SecretString,
 							}),
 						);
+
+						createOrUpdateSecretsOverview.push({
+							envVariableName: createSecretRequest.envVariableName,
+							operation: "create",
+							name: createSecretRequest.Name as string,
+							region: region || regionAndOrigin.value,
+						});
+					} else {
+						throw e;
 					}
 				}
 			}
@@ -63,7 +86,8 @@ export const AwsSecretsManager = async (options?: {
 			return {
 				createSecretCommands,
 				updateSecretCommands,
-				push: async () => {
+				createOrUpdateSecretsOverview,
+				execute: async () => {
 					for (const createSecretCommand of createSecretCommands) {
 						await secretsManagerClient.send(createSecretCommand);
 					}

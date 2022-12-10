@@ -1,13 +1,14 @@
-import { Command } from "commander";
 import {
 	promptOverwriteIfFileExists,
 	readContentsFromFile,
 	writeContentsToFile,
 } from "../../lib/io";
-import { CliPluginEncryptHandler } from "../../lib/plugin";
-import { Encrypt2CommandOptions } from "../../types";
-import { strong } from "../../utils/logger";
+import { EncryptCommandOptions } from "../../types";
+import { DotsecConfig } from "../../types/config";
+import { DotsecCliPluginEncryptHandler } from "../../types/plugin";
+import { strong } from "../../utils/logging";
 import { setProgramOptions } from "../options";
+import { Command } from "commander";
 
 type Formats = {
 	env?: string;
@@ -17,9 +18,11 @@ type Formats = {
 const addEncryptProgram = async (
 	program: Command,
 	options: {
-		encryption: CliPluginEncryptHandler[];
+		encryptHandlers: DotsecCliPluginEncryptHandler[];
+		dotsecConfig: DotsecConfig;
 	},
 ) => {
+	const { encryptHandlers, dotsecConfig } = options;
 	const subProgram = program
 		.enablePositionalOptions()
 		.passThroughOptions()
@@ -30,23 +33,20 @@ const addEncryptProgram = async (
 					// verbose,
 					env: dotenvFilename,
 					sec: dotsecFilename,
+					engine,
 					yes,
-				} = command.optsWithGlobals<Encrypt2CommandOptions>();
-				const pluginCliEncrypt = Object.keys(_options).reduce<
-					CliPluginEncryptHandler | undefined
-				>((acc, key) => {
-					if (!acc) {
-						return options.encryption.find((encryption) => {
-							return encryption.triggerOption === key;
-						});
-					}
-					return acc;
-				}, undefined);
+				} = command.optsWithGlobals<EncryptCommandOptions>();
+
+				const encryptionEngine =
+					engine || dotsecConfig?.defaults?.encryptionEngine;
+				const pluginCliEncrypt = (encryptHandlers || []).find((handler) => {
+					return handler.triggerOptionValue === encryptionEngine;
+				});
 
 				if (!pluginCliEncrypt) {
 					throw new Error(
-						`No encryption plugin found, available encryption engine(s): ${options.encryption
-							.map((e) => `--${e.triggerOption}`)
+						`No encryption plugin found, available encryption engine(s): ${options.encryptHandlers
+							.map((e) => e.triggerOptionValue)
 							.join(", ")}`,
 					);
 				}
@@ -90,7 +90,7 @@ const addEncryptProgram = async (
 			}
 		});
 
-	options.encryption.map((encryption) => {
+	options.encryptHandlers.map((encryption) => {
 		const { options, requiredOptions } = encryption;
 		if (options) {
 			Object.values(options).map((option) => {
@@ -105,8 +105,22 @@ const addEncryptProgram = async (
 			});
 		}
 	});
-	setProgramOptions(subProgram);
 
+	const engines = options.encryptHandlers.map((e) => e.triggerOptionValue);
+	const encryptionEngineNames = options.encryptHandlers.map(
+		(e) => e.encryptionEngineName,
+	);
+	subProgram.option(
+		"--engine <engine>",
+		`Encryption engine${engines.length > 0 ? "s" : ""}: ${
+			(engines.join(", "), engines.length === 1 ? engines[0] : undefined)
+		}`,
+		// engines.length === 1 ? engines[0] : undefined,
+	);
+	setProgramOptions(subProgram);
+	subProgram.description(
+		`Encrypt .env file using ${encryptionEngineNames.join(", ")}`,
+	);
 	return subProgram;
 };
 

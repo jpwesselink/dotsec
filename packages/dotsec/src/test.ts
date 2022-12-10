@@ -1,4 +1,4 @@
-import dotsec from "./dotsec";
+import dotsec from "../../../.tmp/dotsec";
 
 void dotsec
 	.config({

@@ -22,7 +22,7 @@
     "esbuild-runner": "^2.2.1",
     "husky": "^7.0.4",
     "lerna": "^4.0.0",
-    "rome": "^10.0.1",
+    "rome": "^11.0.0",
     "turbo": "^1.6.3",
     "typedoc": "^0.23.21",
     "typedoc-plugin-markdown": "^3.13.6",

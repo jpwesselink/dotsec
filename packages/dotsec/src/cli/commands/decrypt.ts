@@ -1,13 +1,14 @@
-import { Command } from "commander";
 import {
 	promptOverwriteIfFileExists,
 	readContentsFromFile,
 	writeContentsToFile,
 } from "../../lib/io";
-import { CliPluginDecryptHandler } from "../../lib/plugin";
-import { Decrypt2CommandOptions } from "../../types";
-import { strong } from "../../utils/logger";
+import { DecryptCommandOptions } from "../../types";
+import { DotsecConfig } from "../../types/config";
+import { DotsecCliPluginDecryptHandler } from "../../types/plugin";
+import { strong } from "../../utils/logging";
 import { setProgramOptions } from "../options";
+import { Command } from "commander";
 
 type Formats = {
 	env?: string;
@@ -17,9 +18,11 @@ type Formats = {
 const addEncryptProgram = async (
 	program: Command,
 	options: {
-		decryption: CliPluginDecryptHandler[];
+		dotsecConfig: DotsecConfig;
+		decryptHandlers: DotsecCliPluginDecryptHandler[];
 	},
 ) => {
+	const { dotsecConfig, decryptHandlers } = options;
 	const subProgram = program
 		.enablePositionalOptions()
 		.passThroughOptions()
@@ -30,24 +33,20 @@ const addEncryptProgram = async (
 					// verbose,
 					env: dotenvFilename,
 					sec: dotsecFilename,
+					engine,
 					yes,
-				} = command.optsWithGlobals<Decrypt2CommandOptions>();
+				} = command.optsWithGlobals<DecryptCommandOptions>();
 
-				const pluginCliDecrypt = Object.keys(_options).reduce<
-					CliPluginDecryptHandler | undefined
-				>((acc, key) => {
-					if (!acc) {
-						return options.decryption.find((encryption) => {
-							return encryption.triggerOption === key;
-						});
-					}
-					return acc;
-				}, undefined);
+				const encryptionEngine =
+					engine || dotsecConfig?.defaults?.encryptionEngine;
+				const pluginCliDecrypt = (decryptHandlers || []).find((handler) => {
+					return handler.triggerOptionValue === encryptionEngine;
+				});
 
 				if (!pluginCliDecrypt) {
 					throw new Error(
-						`No decryption plugin found, available decryption engine(s): ${options.decryption
-							.map((e) => `--${e.triggerOption}`)
+						`No decryption plugin found, available decryption engine(s): ${options.decryptHandlers
+							.map((e) => `--${e.triggerOptionValue}`)
 							.join(", ")}`,
 					);
 				}
@@ -62,7 +61,6 @@ const addEncryptProgram = async (
 						return [key, _options[key]];
 					}),
 				);
-				console.log("dotsecFilename", dotsecFilename);
 				// get current dot env file
 				const dotsecString = await readContentsFromFile(dotsecFilename);
 
@@ -86,15 +84,13 @@ const addEncryptProgram = async (
 						)} file to ${strong(dotenvFilename)}`,
 					);
 				}
-
-				console.log("plaintext", plaintext);
 			} catch (e) {
 				console.error(strong(e.message));
 				command.help();
 			}
 		});
 
-	options.decryption.map((decryption) => {
+	options.decryptHandlers.map((decryption) => {
 		const { options, requiredOptions } = decryption;
 		if (options) {
 			Object.values(options).map((option) => {
@@ -109,6 +105,15 @@ const addEncryptProgram = async (
 			});
 		}
 	});
+
+	const engines = options.decryptHandlers.map((e) => e.triggerOptionValue);
+	subProgram.option(
+		"--engine <engine>",
+		`Encryption engine${engines.length > 0 ? "s" : ""} to use: ${
+			(engines.join(", "), engines.length === 1 ? engines[0] : undefined)
+		}`,
+		engines.length === 1 ? engines[0] : undefined,
+	);
 	setProgramOptions(subProgram);
 
 	return subProgram;

@@ -1,6 +1,6 @@
 import fs, { stat } from "node:fs/promises";
-import prompts from "prompts";
 import path from "node:path";
+import prompts from "prompts";
 
 export const readContentsFromFile = async (
 	filePath: string,

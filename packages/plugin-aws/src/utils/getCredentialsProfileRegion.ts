@@ -1,16 +1,15 @@
 import {
+	CredentialsAndOrigin,
+	ProfileAndOrigin,
+	RegionAndOrigin,
+} from "../types";
+import {
 	fromEnv,
 	fromIni,
 	fromTemporaryCredentials,
 } from "@aws-sdk/credential-providers";
 import { loadSharedConfigFiles } from "@aws-sdk/shared-ini-file-loader";
-import { emphasis, strong } from "../../utils/logger";
-
-import {
-	CredentialsAndOrigin,
-	ProfileAndOrigin,
-	RegionAndOrigin,
-} from "./types";
+import { emphasis, strong } from "dotsec";
 
 export const getCredentialsProfileRegion = async ({
 	argv,

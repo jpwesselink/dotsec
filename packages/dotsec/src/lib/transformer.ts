@@ -1,5 +1,5 @@
-import * as ts from "typescript";
 import fs from "node:fs";
+import * as ts from "typescript";
 
 export const patchConfigFile = (options: {
 	configFile: string;
@@ -26,10 +26,6 @@ export const patchConfigFile = (options: {
 						if (kmsNode?.getChildAt(0)?.getText() === "kms") {
 							const awsNode = kmsNode?.parent?.parent;
 							if (awsNode?.getChildAt(0).getText() === "aws") {
-								// console.log(
-								// 	"parent is aws",
-								// 	node.parent?.getChildAt(2).getText(),
-								// );
 								return ts.createStringLiteral(
 									options.config?.aws?.kms?.keyAlias,
 								);

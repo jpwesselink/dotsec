@@ -2,10 +2,13 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "nursery": {
+        "recommended": true
+      }
     },
     "ignore": [
-      "./packakges/dotsec/src/templates/**",
+      "./packages/dotsec/src/templates/**",
       "./packages/dotsec/dist/**",
       "./packages/dotsec/bin/**"
     ]
@@ -13,7 +16,7 @@
   "formatter": {
     "enabled": true,
     "ignore": [
-      "./packakges/dotsec/src/templates/**",
+      "./packages/dotsec/src/templates/**",
       "./packages/dotsec/bin/**",
       "./packages/dotsec/dist/**"
     ]

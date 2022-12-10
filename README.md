@@ -1,7 +1,6 @@
 # dotsec
 
-Like dotenv, but encrypted.
-
+The solution offers encryption and decryption of .env files to and from .sec files, the ability to run a command with the values of a .env/.sec file in its environment, and the ability to push selected .env/.sec entries to AWS Systems Manager Parameter Store and AWS Secrets Manager.
 Encrypts your .env file with the AWS Encryption SDK so you can safely commit it to your repository.
 
 ## Features
@@ -12,6 +11,19 @@ Encrypts your .env file with the AWS Encryption SDK so you can safely commit it 
 - Run a command with the values of a .sec file in its environment.
 - Push selected .env/.sec entries to AWS Systems Manager Parameter Store.
 - Push selected .env/.sec entries to AWS Secrets Manager.
+- Holds no opinion on how you should manage your organization's user roles and permissions, you know best.
+
+### AWS plugin
+
+- Supported KMS key types: symmetric and assymetric:
+  - SYMMETRIC_DEFAULT
+  - RSA_2048
+    - RSAES_OAEP_SHA_256
+  - RSA_3072
+    - RSAES_OAEP_SHA_256
+  - RSA_4096
+    - RSAES_OAEP_SHA_256
+  - SM2PKE
 
 ## Requirements
 
@@ -155,7 +167,7 @@ We do, however, since this package is relatively new, I don't think you should.
 - Write guide on postinstall for npm/yarn/pnpm
 - Add chunking for encoding larger files with assymetric keys. Current limit is 4kb.
 - Add support for other encryption SDKs like GCP KMS, Azure Key Vault, etc.
-- Split up dotsec package in multiple packages, one for each SDK.
+- Split up dotsec package in multiple packages, one for each encryption SDK.
 - Add support for pulling entries to GitHub actions secrets.
 
 ## Limitations

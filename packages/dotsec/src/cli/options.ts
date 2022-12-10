@@ -1,4 +1,5 @@
 import { Command } from "commander";
+
 import {
 	DOTSEC_DEFAULT_CONFIG_FILE,
 	DOTSEC_DEFAULT_DOTENV_FILENAME,
@@ -27,6 +28,10 @@ export const commandOptions: CommandOptions = {
 				"Config file",
 				DOTSEC_DEFAULT_CONFIG_FILE,
 			],
+			plugin: [
+				"-p, --plugin <plugin>",
+				"Comma-separated list of plugins to use",
+			],
 		},
 	},
 	init: {
@@ -41,51 +46,18 @@ export const commandOptions: CommandOptions = {
 			env: ["--env", "Path to .env file", DOTSEC_DEFAULT_DOTENV_FILENAME],
 			sec: ["--sec", "Path to .sec file", DOTSEC_DEFAULT_DOTSEC_FILENAME],
 			yes: ["--yes", "Skip confirmation prompts", false],
-			awsKeyAlias: [
-				"--aws-key-alias <awsKeyAlias>",
-				"AWS KMS key alias, overrides the value provided in dotsec.config (config.aws.kms.keyAlias)",
-				"alias/dotsec",
-			],
-			awsRegion: [
-				"--aws-region <awsRegion>",
-				"AWS region, overrides the value provided in dotsec.config (config.aws.region) and AWS_REGION",
-			],
+			// awsKeyAlias: [
+			// 	"--aws-key-alias <awsKeyAlias>",
+			// 	"AWS KMS key alias, overrides the value provided in dotsec.config (config.aws.kms.keyAlias)",
+			// 	"alias/dotsec",
+			// ],
+			// awsRegion: [
+			// 	"--aws-region <awsRegion>",
+			// 	"AWS region, overrides the value provided in dotsec.config (config.aws.region) and AWS_REGION",
+			// ],
 		},
 	},
-	// decrypt: {
-	// 	inheritsFrom: ["dotsec"],
-	// 	options: {
-	// 		env: ["--env <env>", "Path to .env file", DOTSEC_DEFAULT_DOTENV_FILENAME],
-	// 		sec: ["--sec <sec>", "Path to .sec file", DOTSEC_DEFAULT_DOTSEC_FILENAME],
-	// 		yes: ["--yes", "Skip confirmation prompts", false],
-	// 		awsKeyAlias: [
-	// 			"--aws-key-alias <awsKeyAlias>",
-	// 			"AWS KMS key alias, overrides the value provided in dotsec.config (config.aws.kms.keyAlias)",
-	// 			"alias/dotsec",
-	// 		],
-	// 		awsRegion: [
-	// 			"--aws-region <awsRegion>",
-	// 			"AWS region, overrides the value provided in dotsec.config (config.aws.region) and AWS_REGION",
-	// 		],
-	// 	},
-	// },
-	// encrypt: {
-	// 	inheritsFrom: ["dotsec"],
-	// 	options: {
-	// 		env: ["--env <env>", "Path to .env file", DOTSEC_DEFAULT_DOTENV_FILENAME],
-	// 		sec: ["--sec <sec>", "Path to .sec file", DOTSEC_DEFAULT_DOTSEC_FILENAME],
-	// 		yes: ["--yes", "Skip confirmation prompts", false],
-	// 		awsKeyAlias: [
-	// 			"--aws-key-alias <awsKeyAlias>",
-	// 			"AWS KMS key alias, overrides the value provided in dotsec.config (config.aws.kms.keyAlias)",
-	// 			"alias/dotsec",
-	// 		],
-	// 		awsRegion: [
-	// 			"--aws-region <awsRegion>",
-	// 			"AWS region, overrides the value provided in dotsec.config (config.aws.region) and AWS_REGION",
-	// 		],
-	// 	},
-	// },
+
 	encrypt: {
 		inheritsFrom: ["dotsec"],
 		options: {
@@ -103,53 +75,38 @@ export const commandOptions: CommandOptions = {
 		},
 	},
 
-	// run: {
-	// 	inheritsFrom: ["dotsec"],
-	// 	options: {
-	// 		env: ["--env <env>", "Path to .env file"],
-	// 		sec: ["--sec [sec]", "Path to .sec file"],
-	// 		awsKeyAlias: [
-	// 			"--aws-key-alias <awsKeyAlias>",
-	// 			"AWS KMS key alias, overrides the value provided in dotsec.config (config.aws.kms.keyAlias)",
-	// 			"alias/dotsec",
-	// 		],
-	// 		awsRegion: [
-	// 			"--aws-region <awsRegion>",
-	// 			"AWS region, overrides the value provided in dotsec.config (config.aws.region) and AWS_REGION",
-	// 		],
-	// 	},
-	// },
 	run: {
 		inheritsFrom: ["dotsec"],
+
 		options: {
-			env: ["--env <env>", "Path to .env file"],
+			withEnv: [
+				"--with-env, --withEnv",
+				`Run command with ${DOTSEC_DEFAULT_DOTENV_FILENAME} file`,
+			],
+			withSec: [
+				"--with-sec, --withSec",
+				`Run command with ${DOTSEC_DEFAULT_DOTSEC_FILENAME} file`,
+			],
+			env: ["--env <env>", "Path to .env file", DOTSEC_DEFAULT_DOTENV_FILENAME],
+			sec: ["--sec <sec>", "Path to .sec file", DOTSEC_DEFAULT_DOTSEC_FILENAME],
+			yes: ["--yes", "Skip confirmation prompts", false],
 		},
 	},
 	push: {
 		inheritsFrom: ["dotsec"],
 		options: {
-			toAwsSsm: ["--to-aws-ssm, --toAwsSsm", "Push to AWS SSM"],
-			toAwsSecretsManager: [
-				"--to-aws-secrets-manager, --toAwsSecretsManager",
-				"Push to AWS Secrets Manager",
+			withEnv: [
+				"--with-env, --withEnv",
+				`Run command with ${DOTSEC_DEFAULT_DOTENV_FILENAME} file`,
 			],
-			toGitHubActionsSecrets: [
-				"--to-github-actions-secrets, --toGitHubActionsSecrets",
-				"Push to GitHub actions secrets",
+			withSec: [
+				"--with-sec, --withSec",
+				`Run command with ${DOTSEC_DEFAULT_DOTSEC_FILENAME} file`,
 			],
 
-			env: ["--env [env]", "Path to .env file"],
-			sec: ["--sec [sec]", "Path to .sec file"],
+			env: ["--env <env>", "Path to .env file", DOTSEC_DEFAULT_DOTENV_FILENAME],
+			sec: ["--sec <sec>", "Path to .sec file", DOTSEC_DEFAULT_DOTSEC_FILENAME],
 			yes: ["--yes", "Skip confirmation prompts", false],
-			awsKeyAlias: [
-				"--aws-key-alias <awsKeyAlias>",
-				"AWS KMS key alias, overrides the value provided in dotsec.config (config.aws.kms.keyAlias)",
-				"alias/dotsec",
-			],
-			awsRegion: [
-				"--aws-region <awsRegion>",
-				"AWS region, overrides the value provided in dotsec.config (config.aws.region) and AWS_REGION",
-			],
 		},
 	},
 };
@@ -164,8 +121,7 @@ const getInheritedOptions = (
 		if (command.inheritsFrom) {
 			return command?.inheritsFrom.reduce(
 				(acc, inheritedCommandName) => {
-					const r = getInheritedOptions(copts, inheritedCommandName, acc);
-					return { ...r };
+					return getInheritedOptions(copts, inheritedCommandName, acc);
 				},
 				{
 					options: { ...result.options, ...command.options },

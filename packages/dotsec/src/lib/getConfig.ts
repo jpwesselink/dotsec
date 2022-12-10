@@ -1,13 +1,12 @@
-import path from "node:path";
-
+import { DOTSEC_CONFIG_FILES, defaultConfig } from "../constants";
+import { DotsecConfig } from "../types/config";
+import { DotsecConfigAndSource } from "../types/plugin";
+import { loadJson } from "./json";
 import { bundleRequire } from "bundle-require";
 import JoyCon from "joycon";
+import path from "path";
 
-import { loadJson } from "../json";
-import { DotsecConfig, DotsecConfigAndSource } from "../../types";
-import { defaultConfig, DOTSEC_CONFIG_FILES } from "../../constants";
-
-export const getConfig = async (
+export const getMagicalConfig = async (
 	filename?: string,
 ): Promise<DotsecConfigAndSource> => {
 	const cwd = process.cwd();
@@ -41,29 +40,16 @@ export const getConfig = async (
 				contents: {
 					...defaultConfig,
 					...data,
-					config: {
-						...data?.config,
-						...defaultConfig.config,
-						github: {
-							...data?.config?.github,
-							...defaultConfig?.config?.github,
+					defaults: {
+						...data?.defaults,
+						...defaultConfig.defaults,
+						plugins: {
+							...data?.defaults?.plugins,
+							...defaultConfig.defaults?.plugins,
 						},
-						aws: {
-							...data?.config?.aws,
-							...defaultConfig?.config?.aws,
-							kms: {
-								...defaultConfig?.config?.aws?.kms,
-								...data.config?.aws?.kms,
-							},
-							ssm: {
-								...defaultConfig?.config?.aws?.ssm,
-								...data.config?.aws?.ssm,
-							},
-							secretsManager: {
-								...defaultConfig?.config?.aws?.secretsManager,
-								...data.config?.aws?.secretsManager,
-							},
-						},
+					},
+					variables: {
+						...data?.variables,
 					},
 				},
 			};
@@ -80,29 +66,16 @@ export const getConfig = async (
 				contents: {
 					...defaultConfig,
 					...data,
-					config: {
-						...data?.config,
-						...defaultConfig.config,
-						github: {
-							...data?.config?.github,
-							...defaultConfig?.config?.github,
+					defaults: {
+						...data?.defaults,
+						...defaultConfig.defaults,
+						plugins: {
+							...data?.defaults?.plugins,
+							...defaultConfig.defaults?.plugins,
 						},
-						aws: {
-							...data?.config?.aws,
-							...defaultConfig?.config?.aws,
-							kms: {
-								...defaultConfig?.config?.aws?.kms,
-								...data.config?.aws?.kms,
-							},
-							ssm: {
-								...defaultConfig?.config?.aws?.ssm,
-								...data.config?.aws?.ssm,
-							},
-							secretsManager: {
-								...defaultConfig?.config?.aws?.secretsManager,
-								...data.config?.aws?.secretsManager,
-							},
-						},
+					},
+					variables: {
+						...data?.variables,
 					},
 				},
 			};
