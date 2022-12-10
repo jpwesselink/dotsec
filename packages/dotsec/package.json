@@ -1,6 +1,6 @@
 {
     "name": "dotsec",
-    "version": "1.0.0-alpha.14",
+    "version": "1.0.0-alpha.15",
     "description": "",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -54,13 +54,13 @@
         "bundle-require": "^3.0.4",
         "camel-case": "^4.1.2",
         "chalk": "^4.1.2",
+        "cli-table": "^0.3.11",
         "commander": "^9.4.1",
         "constant-case": "^3.0.4",
         "cross-spawn": "^7.0.3",
         "dotenv": "^16.0.0",
         "joycon": "^3.1.1",
         "prompts": "^2.4.2",
-        "cli-table": "^0.3.11",
         "typescript": "~4.9.3",
         "yargs-parser": "^21.1.1"
     },
