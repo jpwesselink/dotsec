@@ -30,7 +30,7 @@ Encrypts your .env file with the AWS Encryption SDK so you can safely commit it 
 - For initialisation enough credentials for creating a KMS key, and alias.
 - For usage enough credentials for using the KMS key to encrypt and/or decrypt.
 - An AWS KMS key with an alias.
-
+<!-- 
 ## Usage
 
 If you don't have an AWS KMS key with an alias, you can create one with the following command:
@@ -146,7 +146,7 @@ Take your favorite editor, and edit the `dotsec.config.ts` file. Add the followi
 
 ```sh
 npx dotsec push --env --to-aws-secrets-manager
-```
+``` -->
 
 ### FAQ
 
