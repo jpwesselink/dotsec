@@ -1,5 +1,5 @@
 {
-    "name": "@dotsec/plugin-aws",
+    "name": "@dotsec/plugin-pke",
     "version": "1.0.0-alpha.39",
     "description": "",
     "main": "./dist/index.js",
@@ -22,7 +22,7 @@
     "repository": {
         "type": "git",
         "url": "git@github.com:jpwesselink/dotsec.git",
-        "directory": "packages/plugin-aws"
+        "directory": "packages/plugin-pke"
     },
     "publishConfig": {
         "access": "public"
@@ -38,11 +38,6 @@
         "tsup": "^4.14.0"
     },
     "dependencies": {
-        "@aws-sdk/client-kms": "^3.52.0",
-        "@aws-sdk/client-secrets-manager": "^3.52.0",
-        "@aws-sdk/client-ssm": "^3.52.0",
-        "@aws-sdk/credential-providers": "^3.52.0",
-        "@aws-sdk/shared-ini-file-loader": "^3.52.0",
         "change-case": "^4.1.2",
         "typescript": "~4.9.3"
     },
