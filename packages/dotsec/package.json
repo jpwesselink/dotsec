@@ -1,6 +1,6 @@
 {
     "name": "dotsec",
-    "version": "2.0.0-alpha.0",
+    "version": "2.0.0-alpha.1",
     "description": "",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -49,6 +49,7 @@
         "dotsec": "*"
     },
     "dependencies": {
+        "@dotsec/plugin-pke": "*",
         "@npmcli/arborist": "^6.1.4",
         "ajv": "^8.11.2",
         "bundle-require": "^3.0.4",
