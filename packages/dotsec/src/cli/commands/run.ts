@@ -2,7 +2,9 @@ import fs from "node:fs";
 
 import { Command } from "commander";
 import { parse } from "dotenv";
+import { expand } from "dotenv-expand";
 
+import { addPluginOptions } from "../../lib/addPluginOptions";
 import { RunCommandOptions } from "../../types";
 import { DotsecConfig } from "../../types/config";
 import { DotsecCliPluginDecryptHandler } from "../../types/plugin";
@@ -11,45 +13,23 @@ import { setProgramOptions } from "../options";
 import { spawnSync } from "node:child_process";
 const addRunProgam = (
 	program: Command,
-	options?: {
+	options: {
 		dotsecConfig: DotsecConfig;
 		decryptHandlers?: DotsecCliPluginDecryptHandler[];
 	},
 ) => {
 	const { dotsecConfig, decryptHandlers } = options || {};
 
+	// is there an encryption engine?
+	const hasDecryptEngine =
+		decryptHandlers !== undefined && decryptHandlers.length > 0;
+
 	const subProgram = program
 		.command("run <command...>")
-		.usage("[--with-env --env .env] [--with-sec --sec .sec] [commandArgs...]")
-		.allowUnknownOption()
+		.allowUnknownOption(true)
+		.enablePositionalOptions()
+		.passThroughOptions()
 		.showHelpAfterError(true)
-		.description(
-			`Run a command in a separate process and populate env with decrypted .env or encrypted .sec values.
-The --withEnv option will take precedence over the --withSec option. If neither are specified, the --withEnv option will be used by default.
-
-${"Examples:"}
-
-${"Run a command with a .env file"}
-
-$ dotsec run echo "hello world"
-
-
-${"Run a command with a specific .env file"}
-
-$ dotsec run --with-env --env .env.dev echo "hello world"
-
-
-${"Run a command with a .sec file"}
-
-$ dotsec run --with-sec echo "hello world"
-
-
-${"Run a command with a specific .sec file"}
-
-$ dotsec run --with-sec --sec .sec.dev echo "hello world"
-
-`,
-		)
 		.action(
 			async (
 				commands: string[],
@@ -57,28 +37,19 @@ $ dotsec run --with-sec --sec .sec.dev echo "hello world"
 				command: Command,
 			) => {
 				try {
-					const {
-						env: dotenv,
-						sec: dotsec,
-						withEnv,
-						withSec,
-						engine,
-					} = command.optsWithGlobals<RunCommandOptions>();
-
-					if (withEnv && withSec) {
-						throw new Error("Cannot use both --with-env and --with-sec");
-					}
+					const { envFile, using, secFile, engine } =
+						command.optsWithGlobals<RunCommandOptions>();
 
 					let envContents: string | undefined;
 
-					if (withEnv || !(withEnv || withSec)) {
-						if (!dotenv) {
-							throw new Error("No dotenv file specified in --env option");
+					if (using === "env" || hasDecryptEngine === false) {
+						if (!envFile) {
+							throw new Error("No dotenv file specified in --env-file option");
 						}
-						envContents = fs.readFileSync(dotenv, "utf8");
-					} else if (withSec) {
-						if (!dotsec) {
-							throw new Error("No dotsec file specified in --sec option");
+						envContents = fs.readFileSync(envFile, "utf8");
+					} else if (using === "sec") {
+						if (!secFile) {
+							throw new Error("No dotsec file specified in --sec-file option");
 						}
 
 						const encryptionEngine =
@@ -109,7 +80,7 @@ $ dotsec run --with-sec --sec .sec.dev echo "hello world"
 							}),
 						);
 
-						const dotSecContents = fs.readFileSync(dotsec, "utf8");
+						const dotSecContents = fs.readFileSync(secFile, "utf8");
 						envContents = await pluginCliDecrypt.handler({
 							ciphertext: dotSecContents,
 							...allOptionsValues,
@@ -117,16 +88,32 @@ $ dotsec run --with-sec --sec .sec.dev echo "hello world"
 					}
 					if (envContents) {
 						const dotenvVars = parse(envContents);
+						// expand env vars
+						const expandedEnvVars = expand({
+							ignoreProcessEnv: true,
+							parsed: {
+								// add standard env variables
+								...(process.env as Record<string, string>),
+								// add custom env variables, either from .env or .sec, (or empty object if none)
+								...dotenvVars,
+							},
+						});
+
 						const [userCommand, ...userCommandArgs] = commands;
-						spawnSync(userCommand, [...userCommandArgs], {
+						const spawn = spawnSync(userCommand, [...userCommandArgs], {
 							stdio: "inherit",
 							shell: false,
+							encoding: "utf-8",
 							env: {
+								...expandedEnvVars.parsed,
 								...process.env,
-								...dotenvVars,
 								__DOTSEC_ENV__: JSON.stringify(Object.keys(dotenvVars)),
 							},
 						});
+
+						if (spawn.status !== 0) {
+							process.exit(spawn.status || 1);
+						}
 					} else {
 						throw new Error("No .env or .sec file provided");
 					}
@@ -136,25 +123,18 @@ $ dotsec run --with-sec --sec .sec.dev echo "hello world"
 				}
 			},
 		);
-
-	setProgramOptions(subProgram, "run");
-	decryptHandlers?.map((run) => {
-		const { options, requiredOptions } = run;
-		if (options) {
-			Object.values(options).map((option) => {
-				// @ts-ignore
-				subProgram.option(...option);
-			});
-		}
-		if (requiredOptions) {
-			Object.values(requiredOptions).map((requiredOption) => {
-				// @ts-ignore
-				subProgram.option(...requiredOption);
-			});
-		}
+	setProgramOptions({
+		program: subProgram,
+		commandName: hasDecryptEngine ? "run" : "runEnvOnly",
+		dotsecConfig,
 	});
 
-	if (decryptHandlers) {
+	if (hasDecryptEngine) {
+		decryptHandlers?.map((run) => {
+			const { options, requiredOptions } = run;
+			addPluginOptions(options, subProgram);
+			addPluginOptions(requiredOptions, subProgram, true);
+		});
 		const engines = decryptHandlers?.map((e) => e.triggerOptionValue);
 
 		subProgram.option(

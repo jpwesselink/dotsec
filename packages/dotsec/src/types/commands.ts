@@ -9,31 +9,35 @@ export type InitCommandOptions = {
 	yes: boolean;
 };
 export type EncryptCommandOptions = GlobalCommandOptions & {
-	env: string;
-	sec: string;
+	envFile: string;
+	secFile: string;
 	engine: string;
+	createManifest: boolean;
+	manifestFile: string;
 	yes: boolean;
 };
 export type DecryptCommandOptions = GlobalCommandOptions & {
-	env: string;
-	sec: string;
+	envFile: string;
+	secFile: string;
 	engine: string;
+	createManifest: boolean;
+	manifestFile: string;
 	yes: boolean;
 };
 export type PushCommandOptions = GlobalCommandOptions & {
 	verbose?: boolean;
-	env?: string;
-	sec?: string;
-	withEnv?: boolean;
-	withSec?: boolean;
+	envFile?: string;
+	secFile?: string;
+	using: "env" | "sec";
+	// withEnv?: boolean;
+	// withSec?: boolean;
 	engine: string;
 	yes: boolean;
 };
 
 export type RunCommandOptions = GlobalCommandOptions & {
-	env?: string;
-	sec?: string;
-	withEnv?: boolean;
-	withSec?: boolean;
+	envFile?: string;
+	secFile?: string;
+	using: "env" | "sec";
 	engine: string;
 };

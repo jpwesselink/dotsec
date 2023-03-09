@@ -1,0 +1,20 @@
+$ tsup
+CLI Building entry: src/index.ts
+CLI Using tsconfig: ../../tsconfig.json
+CLI tsup v6.6.3
+CLI Using tsup config: /Users/jp/projects/dotsec/packages/plugin-pke/tsup.config.ts
+CLI Target: es2020
+CLI Cleaning output folder
+CJS Build start
+ESM Build start
+CJS You have emitDecoratorMetadata enabled but @swc/core was not installed, skipping swc plugin
+ESM You have emitDecoratorMetadata enabled but @swc/core was not installed, skipping swc plugin
+CJS dist/index.js     3.51 KB
+CJS dist/index.js.map 11.35 KB
+CJS ⚡️ Build success in 13ms
+ESM dist/index.mjs     2.86 KB
+ESM dist/index.mjs.map 11.19 KB
+ESM ⚡️ Build success in 13ms
+DTS Build start
+DTS ⚡️ Build success in 502ms
+DTS dist/index.d.ts 888.00 B

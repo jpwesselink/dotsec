@@ -1,12 +1,15 @@
+import { addPluginOptions } from "../../lib/addPluginOptions";
 import { PushCommandOptions } from "../../types";
 import { DotsecConfig } from "../../types/config";
 import {
+	DotsecCliOption,
 	DotsecCliPluginDecryptHandler,
 	DotsecCliPluginPushHandler,
 } from "../../types/plugin";
-import { setProgramOptions } from "../options";
+import { setProgramOptions } from "../options/index";
 import { Command } from "commander";
 import { parse } from "dotenv";
+import { expand } from "dotenv-expand";
 import fs from "node:fs";
 
 /**
@@ -37,11 +40,11 @@ const addPushProgram = async (
 			try {
 				const {
 					// verbose,
-					env: dotenv,
-					sec: dotsec,
-					withEnv,
-					withSec,
+					using,
+					envFile,
+					secFile,
 					engine,
+
 					yes,
 				} = command.optsWithGlobals<PushCommandOptions>();
 
@@ -59,7 +62,6 @@ const addPushProgram = async (
 				if (!pluginCliPush) {
 					throw new Error("No push plugin found!");
 				}
-
 				const allOptionKeys = [
 					...Object.keys(pluginCliDecrypt?.options || {}),
 					...Object.keys(pluginCliDecrypt?.requiredOptions || {}),
@@ -73,20 +75,16 @@ const addPushProgram = async (
 					}),
 				);
 
-				if (withEnv && withSec) {
-					throw new Error("Cannot use both --with-env and --with-sec");
-				}
-
 				let envContents: string | undefined;
 
-				if (withEnv || !(withEnv || withSec)) {
-					if (!dotenv) {
-						throw new Error("No dotenv file specified in --env option");
+				if (using === "env") {
+					if (!envFile) {
+						throw new Error("No dotenv file specified in --env-file option");
 					}
-					envContents = fs.readFileSync(dotenv, "utf8");
-				} else if (withSec) {
-					if (!dotsec) {
-						throw new Error("No dotsec file specified in --sec option");
+					envContents = fs.readFileSync(envFile, "utf8");
+				} else {
+					if (!secFile) {
+						throw new Error("No dotsec file specified in --sec-file option");
 					}
 
 					if (!pluginCliDecrypt) {
@@ -97,7 +95,7 @@ const addPushProgram = async (
 						);
 					}
 
-					const dotSecContents = fs.readFileSync(dotsec, "utf8");
+					const dotSecContents = fs.readFileSync(secFile, "utf8");
 					envContents = await pluginCliDecrypt.handler({
 						ciphertext: dotSecContents,
 						...allOptionsValues,
@@ -105,208 +103,106 @@ const addPushProgram = async (
 				}
 				if (envContents) {
 					// convert to object
-					const envObject = parse(envContents);
-					await pluginCliPush.handler({
-						variables: envObject,
-						yes,
-						...allOptionsValues,
+					const dotenvVars = parse(envContents);
+					// expand env vars
+					const expandedEnvVars = expand({
+						ignoreProcessEnv: true,
+						parsed: {
+							// add standard env variables
+							...(process.env as Record<string, string>),
+							// add custom env variables, either from .env or .sec, (or empty object if none)
+							...dotenvVars,
+						},
 					});
+
+					if (expandedEnvVars.parsed) {
+						await pluginCliPush.handler({
+							push: expandedEnvVars.parsed,
+							yes,
+							...allOptionsValues,
+						});
+					}
 				} else {
 					throw new Error("No .env or .sec file provided");
 				}
-
-				// 			let envContents: string | undefined;
-
-				// 			if (env) {
-				// 				const dotenvFilename = isBoolean(env)
-				// 					? DOTSEC_DEFAULT_DOTENV_FILENAME
-				// 					: env;
-				// 				envContents = fs.readFileSync(dotenvFilename, "utf8");
-				// 			} else if (sec) {
-				// 				const dotsecFilename = isBoolean(sec)
-				// 					? DOTSEC_DEFAULT_DOTSEC_FILENAME
-				// 					: sec;
-				// 				const dotSecContents = fs.readFileSync(dotsecFilename, "utf8");
-				// 				const encryptionEngine = await awsEncryptionEngineFactory({
-				// 					verbose,
-				// 					region:
-				// 						awsRegion ||
-				// 						process.env.AWS_REGION ||
-				// 						dotsecConfig.config?.aws?.region,
-				// 					kms: {
-				// 						keyAlias: awskeyAlias || dotsecConfig?.config?.aws?.kms?.keyAlias,
-				// 					},
-				// 				});
-
-				// 				envContents = await encryptionEngine.decrypt(dotSecContents);
-				// 			} else {
-				// 				throw new Error('Must provide either "--env" or "--sec"');
-				// 			}
-
-				// 			const envObject = parse(envContents);
-
-				// 			// get dotsec config
-				// 			try {
-				// 				if (toAwsSsm) {
-				// 					const ssmDefaults = dotsecConfig?.config?.aws?.ssm;
-				// 					const ssmType = ssmDefaults?.parameterType || "SecureString";
-
-				// 					const pathPrefix = ssmDefaults?.pathPrefix || "";
-				// 					const putParameterRequests = Object.entries(envObject).reduce<
-				// 						PutParameterRequest[]
-				// 					>((acc, [key, value]) => {
-				// 						if (dotsecConfig.variables?.[key]) {
-				// 							const entry = dotsecConfig.variables?.[key];
-				// 							if (entry) {
-				// 								const keyName = `${pathPrefix}${key}`;
-				// 								if (entry.push?.aws?.ssm) {
-				// 									const putParameterRequest: PutParameterRequest = isBoolean(
-				// 										entry.push.aws.ssm,
-				// 									)
-				// 										? {
-				// 												Name: keyName,
-				// 												Value: value,
-				// 												Type: ssmType,
-				// 										  }
-				// 										: {
-				// 												Name: keyName,
-				// 												Type: ssmType,
-				// 												...entry.push.aws.ssm,
-				// 												Value: value,
-				// 										  };
-
-				// 									acc.push(putParameterRequest);
-				// 									// return putParameterRequest;
-				// 								}
-				// 							}
-				// 						}
-
-				// 						return acc;
-				// 					}, []);
-
-				// 					const { confirm } = await promptConfirm({
-				// 						message: `Are you sure you want to push the following variables to AWS SSM Parameter Store?
-				// ${putParameterRequests
-				// 	.map(({ Name }) => `- ${strong(Name || "[no name]")}`)
-				// 	.join("\n")}`,
-				// 						skip: yes,
-				// 					});
-
-				// 					if (confirm === true) {
-				// 						console.log("pushing to AWS SSM Parameter Store");
-				// 						const meh = await AwsSsm({
-				// 							region: awsRegion || dotsecConfig?.config?.aws?.region,
-				// 						});
-
-				// 						await meh.put(putParameterRequests);
-				// 					}
-				// 				}
-
-				// 				// secrets manager
-				// 				if (toAwsSecretsManager) {
-				// 					// create secretss
-				// 					const secretsManagerDefaults =
-				// 						dotsecConfig?.config?.aws?.secretsManager;
-				// 					const pathPrefix = secretsManagerDefaults?.pathPrefix || "";
-				// 					const awsSecretsMananger = await AwsSecretsManager({
-				// 						region:
-				// 							awsRegion ||
-				// 							process.env.AWS_REGION ||
-				// 							dotsecConfig.config?.aws?.region,
-				// 					});
-
-				// 					const createSecretRequests = Object.entries(envObject).reduce<
-				// 						CreateSecretRequest[]
-				// 					>((acc, [key, value]) => {
-				// 						if (dotsecConfig.variables?.[key]) {
-				// 							const entry = dotsecConfig.variables?.[key];
-				// 							if (entry) {
-				// 								const keyName = `${pathPrefix}${key}`;
-				// 								if (entry.push?.aws?.ssm) {
-				// 									const createSecretRequest: CreateSecretRequest = isBoolean(
-				// 										entry.push.aws.ssm,
-				// 									)
-				// 										? {
-				// 												Name: keyName,
-				// 												SecretString: value,
-				// 										  }
-				// 										: {
-				// 												Name: keyName,
-				// 												...entry.push.aws.ssm,
-				// 												SecretString: value,
-				// 										  };
-
-				// 									acc.push(createSecretRequest);
-				// 								}
-				// 							}
-				// 						}
-
-				// 						return acc;
-				// 					}, []);
-				// 					const { push, updateSecretCommands, createSecretCommands } =
-				// 						await awsSecretsMananger.push(createSecretRequests);
-				// 					const confirmations: boolean[] = [];
-				// 					if (updateSecretCommands.length > 0) {
-				// 						const { confirm: confirmUpdate } = await promptConfirm({
-				// 							message: `Are you sure you want to update the following variables to AWS SSM Secrets Manager?
-				// ${updateSecretCommands
-				// 	.map(({ input: { SecretId } }) => `- ${strong(SecretId || "[no name]")}`)
-				// 	.join("\n")}`,
-				// 							skip: yes,
-				// 						});
-
-				// 						confirmations.push(confirmUpdate);
-				// 					}
-				// 					if (createSecretCommands.length > 0) {
-				// 						const { confirm: confirmCreate } = await promptConfirm({
-				// 							message: `Are you sure you want to create the following variables to AWS SSM Secrets Manager?
-				// ${createSecretCommands
-				// 	.map(({ input: { Name } }) => `- ${strong(Name || "[no name]")}`)
-				// 	.join("\n")}`,
-				// 							skip: yes,
-				// 						});
-
-				// 						confirmations.push(confirmCreate);
-				// 					}
-				// 					if (confirmations.find((c) => c === false) === undefined) {
-				// 						console.log("xpushing to AWS Secrets Manager");
-
-				// 						await push();
-				// 					}
-				// 				}
-
-				// 				if (toGitHubActionsSecrets) {
-				// 					// which env vars should we push to github actions secrets?
-				// 					const githubActionsSecrets = Object.entries(envObject).reduce<
-				// 						{ name: string; value: string }[]
-				// 					>((acc, [key, value]) => {
-				// 						if (dotsecConfig.variables?.[key]) {
-				// 							const entry = dotsecConfig.variables?.[key];
-				// 							if (entry) {
-				// 								if (entry.push?.github?.actionsSecrets) {
-				// 									acc.push({
-				// 										name: key,
-				// 										value,
-				// 									});
-				// 								}
-				// 							}
-				// 						}
-
-				// 						return acc;
-				// 					}, []);
-
-				// 					console.log("githubActionsSecrets", githubActionsSecrets);
-				// 				}
-				// 			} catch (e) {
-				// 				command.error(e);
-				// 			}
 			} catch (e) {
 				console.error(e);
 				process.exit(1);
 			}
 		});
 
-	setProgramOptions(subProgram);
+	setProgramOptions({ program: subProgram, dotsecConfig });
+	const engines = options.handlers.map(
+		({ decrypt }) => decrypt.triggerOptionValue,
+	);
+	subProgram.option(
+		"--engine <engine>",
+		`Encryption engine${engines.length > 0 ? "s" : ""} to use: ${
+			engines.length === 1 ? engines[0] : engines.join(", ")
+		}`,
+		engines.length === 1 ? engines[0] : undefined,
+	);
+	const allOptions: {
+		[x: string]: DotsecCliOption & { required?: boolean };
+	} = {};
+	options.handlers.forEach((handlers) => {
+		Object.keys(handlers).map((handlerName) => {
+			const { options: cliOptions, requiredOptions } = handlers[handlerName];
+			Object.keys(cliOptions || {}).forEach((key) => {
+				allOptions[key] = Array.isArray(cliOptions[key])
+					? cliOptions[key]
+					: { ...allOptions[key], ...cliOptions[key] };
+			});
+			Object.keys(requiredOptions || {}).forEach((key) => {
+				allOptions[key] = Array.isArray(requiredOptions[key])
+					? requiredOptions[key]
+					: {
+							...allOptions[key],
+							...requiredOptions[key],
+							required: true,
+					  };
+			});
+		});
+	});
+
+	const usage: string[] = [];
+	const descriptions: string[] = [];
+
+	handlers.forEach((handler) => {
+		if (handler.push?.description) {
+			descriptions.push(handler.push.description);
+		}
+
+		if (handler.push?.usage) {
+			usage.push(handler.push.usage);
+		}
+	});
+
+	if (descriptions.length > 0) {
+		subProgram.description(descriptions.join("\n"));
+	}
+
+	if (usage.length > 0) {
+		subProgram.usage(usage.join("\n"));
+	}
+
+	addPluginOptions(
+		Object.fromEntries(
+			Object.entries(allOptions).filter(
+				([_key, value]) => value.required !== true,
+			),
+		),
+		subProgram,
+	);
+	addPluginOptions(
+		Object.fromEntries(
+			Object.entries(allOptions).filter(
+				([_key, value]) => value.required === true,
+			),
+		),
+		subProgram,
+		true,
+	);
 
 	return subProgram;
 };

@@ -94,7 +94,9 @@ export const awsEncryptionEngineFactory: AwsEncryptionEngineFactory = async (
 		},
 
 		async decrypt(cipherTextsWithNewlines: string): Promise<string> {
-			const cipherTexts = cipherTextsWithNewlines.split("\n");
+			const cipherTexts = cipherTextsWithNewlines
+				.split("\n")
+				.filter((cipherText) => cipherText.length > 0);
 
 			const plaintext = (
 				await Promise.all(
@@ -104,21 +106,24 @@ export const awsEncryptionEngineFactory: AwsEncryptionEngineFactory = async (
 							CiphertextBlob: Buffer.from(cipherText, "base64"),
 							EncryptionAlgorithm: encryptionAlgorithm,
 						});
-
-						const decryptionResult = await kmsClient.send(decryptCommand);
-
-						if (!decryptionResult.Plaintext) {
-							throw new Error(
-								`Something bad happened: ${JSON.stringify({
-									cipherText: cipherTextsWithNewlines,
-									decryptCommand: decryptCommand,
-								})}`,
-							);
+						try {
+							const decryptionResult = await kmsClient.send(decryptCommand);
+							if (!decryptionResult.Plaintext) {
+								throw new Error(
+									`Something bad happened: ${JSON.stringify({
+										cipherText: cipherTextsWithNewlines,
+										decryptCommand: decryptCommand,
+									})}`,
+								);
+							}
+							const decryptedValue = Buffer.from(
+								decryptionResult.Plaintext,
+							).toString();
+							return decryptedValue;
+						} catch (e) {
+							console.log(e);
+							throw e;
 						}
-						const decryptedValue = Buffer.from(
-							decryptionResult.Plaintext,
-						).toString();
-						return decryptedValue;
 					}),
 				)
 			).join("");

@@ -3,13 +3,20 @@ export type {
 	DotsecEncryptionEngineFactory,
 	DotsecEncryptionEngineFactoryProps,
 	FromEnv,
-	DotsecPlugin,
+	DotsecPluginUserConfigWithNamespace,
 	DotsecPluginModule,
+	DotsecPluginModuleBuilder,
+	Meh,
+	DotsecPluginModuleBuilderConfig,
 	DotsecConfig,
 } from "./types";
 export { promptExecute } from "./utils/prompts";
 export { resolveFromEnv } from "./utils/fromEnv";
-
+export {
+	promptOverwriteIfFileExists,
+	readContentsFromFile,
+	writeContentsToFile,
+} from "./lib/io";
 // import dotsec from "./dotsec";
 // export default dotsec;
 

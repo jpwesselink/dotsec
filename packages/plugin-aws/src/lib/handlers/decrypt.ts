@@ -1,9 +1,9 @@
-import { DotsecPluginModuleConfig } from "../../types";
+import { DotsecPluginAwsModuleConfig } from "../../types";
 import { awsEncryptionEngineFactory } from "../awsEncryptionEngineFactory";
 import { InitDotsecCliPluginDecryptHandler } from "dotsec";
 
 export const initDecryptHandler: InitDotsecCliPluginDecryptHandler<
-	DotsecPluginModuleConfig
+	DotsecPluginAwsModuleConfig
 > = async (options) => {
 	const { dotsecConfig, ajv } = options;
 	return {

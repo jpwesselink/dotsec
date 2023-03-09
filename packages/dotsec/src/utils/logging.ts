@@ -1,32 +1,32 @@
-import chalk from "chalk"
-import Table = require("cli-table")
-export { Table }
+import chalk from "chalk";
+import Table from "cli-table";
+export { Table };
 
-let _logger: Pick<Console, "info" | "error" | "table">
+let _logger: Pick<Console, "info" | "error" | "table">;
 export const getLogger = () => {
 	if (!_logger) {
-		_logger = console
+		_logger = console;
 	}
 
-	return _logger
-}
+	return _logger;
+};
 export const writeLine = (str: string) => {
-	process.stdout.write(str)
-}
-export const emphasis = (str: string): string => chalk.yellowBright(str)
-export const strong = (str: string): string => chalk.yellow.bold(str)
+	process.stdout.write(str);
+};
+export const emphasis = (str: string): string => chalk.yellowBright(str);
+export const strong = (str: string): string => chalk.yellow.bold(str);
 
 export const clientLogger = {
 	debug(content: object) {
-		console.log(content)
+		console.log(content);
 	},
 	info(content: object) {
-		console.log(content)
+		console.log(content);
 	},
 	warn(content: object) {
-		console.log(content)
+		console.log(content);
 	},
 	error(content: object) {
-		console.error(content)
+		console.error(content);
 	},
-}
+};

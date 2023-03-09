@@ -1,6 +1,6 @@
 {
     "name": "dotsec",
-    "version": "2.0.0-alpha.1",
+    "version": "3.0.0-alpha.0",
     "description": "",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -40,16 +40,12 @@
     },
     "devDependencies": {
         "@types/cli-table": "^0.3.1",
-        "@types/node": "^18.11.11",
+        "@types/node": "^18.14.6",
         "@types/prompts": "^2.0.14",
         "@types/yargs-parser": "^21.0.0",
-        "tsup": "^4.14.0"
-    },
-    "peerDependencies": {
-        "dotsec": "*"
+        "tsup": "^6.6.3"
     },
     "dependencies": {
-        "@dotsec/plugin-pke": "*",
         "@npmcli/arborist": "^6.1.4",
         "ajv": "^8.11.2",
         "bundle-require": "^3.0.4",

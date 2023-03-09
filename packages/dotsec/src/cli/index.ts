@@ -9,7 +9,6 @@ import {
 	DotsecPluginConfig,
 } from "../types/plugin";
 import addDecryptProgram from "./commands/decrypt";
-// import addPushProgram from "./commands/push";
 import addEncryptProgram from "./commands/encrypt";
 import addInitCommand from "./commands/init";
 import addPushProgram from "./commands/push";
@@ -51,24 +50,16 @@ const program = new Command();
 			argvPluginModules.push(parsedOptions.plugin);
 		}
 	}
-	if (parsedOptions.p) {
-		if (Array.isArray(parsedOptions.p)) {
-			argvPluginModules.push(...parsedOptions.p);
-		} else {
-			argvPluginModules.push(parsedOptions.p);
-		}
-	}
+	const configFile =
+		[
+			...(Array.isArray(parsedOptions.configFile)
+				? parsedOptions.configFile
+				: [parsedOptions.configFile]),
+			...(Array.isArray(parsedOptions.c) ? parsedOptions.c : [parsedOptions.c]),
+		]?.[0] || process.env.DOTSEC_CONFIG_FILE;
 
-	const configFile = [
-		...(Array.isArray(parsedOptions.config)
-			? parsedOptions.config
-			: [parsedOptions.config]),
-		...(Array.isArray(parsedOptions.c) ? parsedOptions.c : [parsedOptions.c]),
-	]?.[0];
-
-	const { contents: config = {} } = await getMagicalConfig(configFile);
-	const { defaults, variables } = config;
-
+	const { contents: dotsecConfig = {} } = await getMagicalConfig(configFile);
+	const { defaults = {}, push: pushVariables, plugins } = dotsecConfig;
 	program
 		.name("dotsec")
 		.description(".env, but secure")
@@ -77,8 +68,7 @@ const program = new Command();
 		.action((_options, other: Command) => {
 			other.help();
 		});
-
-	setProgramOptions(program);
+	setProgramOptions({ program, dotsecConfig: dotsecConfig });
 	const ajv = new Ajv({
 		allErrors: true,
 		removeAdditional: true,
@@ -90,24 +80,42 @@ const program = new Command();
 	});
 	// if we have plugins in the cli, we need to define them in pluginModules
 	const pluginModules: { [key: string]: string } = {};
+
+	// check plugins
+	if (plugins) {
+		for (const pluginName of plugins) {
+			if (!defaults?.plugins?.[pluginName]) {
+				defaults.plugins = {
+					...defaults.plugins,
+					[pluginName]: {},
+				};
+			}
+		}
+	}
+
+	// check argv
 	if (argvPluginModules.length > 0) {
 		for (const pluginModule of argvPluginModules) {
 			// let's load em up
 			const plugin = await loadDotsecPlugin({ name: pluginModule });
 
 			// good, let's fire 'em up
-			const loadedPlugin = await plugin({ dotsecConfig: config, ajv });
+			const loadedPlugin = await plugin({
+				dotsecConfig: dotsecConfig,
+				ajv,
+				configFile,
+			});
 			pluginModules[loadedPlugin.name] = pluginModule;
 
 			if (argvPluginModules.length === 1) {
 				// if we only have one plugin, let's set it as the default
-				config.defaults = {
-					...config.defaults,
+				dotsecConfig.defaults = {
+					...dotsecConfig.defaults,
 					encryptionEngine: String(loadedPlugin.name),
 					plugins: {
-						...config.defaults?.plugins,
+						...dotsecConfig.defaults?.plugins,
 						[loadedPlugin.name]: {
-							...config.defaults?.plugins?.[loadedPlugin.name],
+							...dotsecConfig.defaults?.plugins?.[loadedPlugin.name],
 						},
 					},
 				};
@@ -126,8 +134,8 @@ const program = new Command();
 	if (defaults?.plugins) {
 		Object.entries(defaults?.plugins).forEach(
 			([pluginName, pluginModule]: [string, DotsecPluginConfig]) => {
-				if (pluginModule?.module) {
-					pluginModules[pluginName] = pluginModule?.module;
+				if (pluginModule?.name) {
+					pluginModules[pluginName] = pluginModule?.name;
 				} else {
 					pluginModules[pluginName] = `@dotsec/plugin-${pluginName}`;
 				}
@@ -135,14 +143,12 @@ const program = new Command();
 		);
 	}
 
-	Object.values(variables || {}).forEach((variable) => {
-		if (variable?.push) {
-			Object.keys(variable.push).forEach((pluginName) => {
-				if (!pluginModules[pluginName]) {
-					pluginModules[pluginName] = `@dotsec/plugin-${pluginName}`;
-				}
-			});
-		}
+	Object.values(pushVariables || {}).forEach((pushVariable) => {
+		Object.keys(pushVariable).forEach((pluginName) => {
+			if (!pluginModules[pluginName]) {
+				pluginModules[pluginName] = `@dotsec/plugin-${pluginName}`;
+			}
+		});
 	});
 
 	// configure encryption command
@@ -158,7 +164,8 @@ const program = new Command();
 		const initDotsecPlugin = await loadDotsecPlugin({ name: pluginModule });
 		const { addCliCommand, cliHandlers: cli } = await initDotsecPlugin({
 			ajv,
-			dotsecConfig: config,
+			dotsecConfig: dotsecConfig,
+			configFile,
 		});
 
 		if (cli?.encrypt) {
@@ -170,36 +177,35 @@ const program = new Command();
 				cliPluginPushHandlers.push({ push: cli.push, decrypt: cli.decrypt });
 			}
 		}
+
 		if (addCliCommand) {
 			addCliCommand({ program });
 		}
 	}
 	if (cliPluginEncryptHandlers.length) {
 		await addEncryptProgram(program, {
-			dotsecConfig: config,
+			dotsecConfig: dotsecConfig,
 			encryptHandlers: cliPluginEncryptHandlers,
 		});
 	}
 	if (cliPluginDecryptHandlers.length) {
 		await addDecryptProgram(program, {
-			dotsecConfig: config,
+			dotsecConfig: dotsecConfig,
 			decryptHandlers: cliPluginDecryptHandlers,
 		});
 	}
 	if (cliPluginPushHandlers.length) {
 		await addPushProgram(program, {
-			dotsecConfig: config,
+			dotsecConfig: dotsecConfig,
 			handlers: cliPluginPushHandlers,
 		});
 	}
 
 	// add other commands
-	await addInitCommand(program);
+	await addInitCommand(program, { dotsecConfig: dotsecConfig });
 	await addRunCommand(program, {
-		dotsecConfig: config,
+		dotsecConfig: dotsecConfig,
 		decryptHandlers: cliPluginDecryptHandlers,
 	});
-	// await addDecryptCommand(program);
-	// await addEncryptCommand(program);
 	await program.parse();
 })();

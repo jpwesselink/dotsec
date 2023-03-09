@@ -1,5 +1,17 @@
 import { EncryptionAlgorithmSpec, KeySpec } from "@aws-sdk/client-kms";
-
+export const ssmAvailableCases = [
+	"camelCase",
+	"capitalCase",
+	"constantCase",
+	"dotCase",
+	"headerCase",
+	"noCase",
+	"paramCase",
+	"pascalCase",
+	"pathCase",
+	"sentenceCase",
+	"snakeCase",
+] as const;
 export const secretsManagerAvailableCases = [
 	"camelCase",
 	"constantCase",
@@ -37,3 +49,5 @@ export const keySpecAlgorithmPayloadMaxByteSizes: {
 		SM2PKE: 1024,
 	},
 } as const;
+
+export const defaultRegion = "us-east-1";

@@ -1,3 +1,4 @@
+import { addPluginOptions } from "../../lib/addPluginOptions";
 import {
 	promptOverwriteIfFileExists,
 	readContentsFromFile,
@@ -9,6 +10,7 @@ import { DotsecCliPluginEncryptHandler } from "../../types/plugin";
 import { strong } from "../../utils/logging";
 import { setProgramOptions } from "../options";
 import { Command } from "commander";
+import { parse } from "dotenv";
 
 type Formats = {
 	env?: string;
@@ -31,9 +33,11 @@ const addEncryptProgram = async (
 			try {
 				const {
 					// verbose,
-					env: dotenvFilename,
-					sec: dotsecFilename,
+					envFile,
+					secFile,
 					engine,
+					createManifest,
+					manifestFile,
 					yes,
 				} = command.optsWithGlobals<EncryptCommandOptions>();
 
@@ -62,7 +66,7 @@ const addEncryptProgram = async (
 					}),
 				);
 
-				const dotenvString = await readContentsFromFile(dotenvFilename);
+				const dotenvString = await readContentsFromFile(envFile);
 
 				const cipherText = await pluginCliEncrypt.handler({
 					plaintext: dotenvString,
@@ -70,19 +74,58 @@ const addEncryptProgram = async (
 				});
 
 				const dotsecOverwriteResponse = await promptOverwriteIfFileExists({
-					filePath: dotsecFilename,
+					filePath: secFile,
 					skip: yes,
 				});
 				if (
 					dotsecOverwriteResponse === undefined ||
 					dotsecOverwriteResponse.overwrite === true
 				) {
-					await writeContentsToFile(dotsecFilename, cipherText);
+					await writeContentsToFile(secFile, cipherText);
 					console.log(
-						`Wrote encrypted contents of ${strong(
-							dotenvFilename,
-						)} file to ${strong(dotsecFilename)}`,
+						`Wrote encrypted contents of ${strong(envFile)} file to ${strong(
+							secFile,
+						)}`,
 					);
+
+					if (createManifest) {
+						// parse raw env contents into key value pairs using the dotenv package
+						const dotenvVars = parse(dotenvString);
+						// expand env vars
+						const markdownManifest = `# Dotsec encryption manifest 
+
+## Overview
+
+- plaintext source: ${envFile}
+- ciphertext target: ${secFile}
+- created: ${new Date().toUTCString()}
+- encryption engine: ${
+							pluginCliEncrypt.encryptionEngineName ||
+							pluginCliEncrypt.triggerOptionValue
+						}
+- encryption engine options: ${JSON.stringify(allOptionsValues)}
+
+## Variables
+
+| Key | 
+| --- | 
+${Object.keys(dotenvVars)
+	.map((key) => {
+		return `| \`${key} \`| `;
+	})
+	.join("\n")}
+`;
+
+						// write manifest file, don't prompt to overwrite
+						const manifestTargetFile =
+							manifestFile || `${secFile}.encryption-manifest.md`;
+						await writeContentsToFile(manifestTargetFile, markdownManifest);
+						console.log(
+							`Wrote manifest of ${strong(envFile)} file to ${strong(
+								manifestTargetFile,
+							)}`,
+						);
+					}
 				}
 			} catch (e) {
 				console.error(strong(e.message));
@@ -90,34 +133,24 @@ const addEncryptProgram = async (
 			}
 		});
 
-	options.encryptHandlers.map((encryption) => {
-		const { options, requiredOptions } = encryption;
-		if (options) {
-			Object.values(options).map((option) => {
-				// @ts-ignore
-				subProgram.option(...option);
-			});
-		}
-		if (requiredOptions) {
-			Object.values(requiredOptions).map((requiredOption) => {
-				// @ts-ignore
-				subProgram.option(...requiredOption);
-			});
-		}
+	options.encryptHandlers.map((encryptionHandler) => {
+		const { options, requiredOptions } = encryptionHandler;
+		addPluginOptions(options, subProgram);
+		addPluginOptions(requiredOptions, subProgram, true);
 	});
-
 	const engines = options.encryptHandlers.map((e) => e.triggerOptionValue);
 	const encryptionEngineNames = options.encryptHandlers.map(
 		(e) => e.encryptionEngineName,
 	);
+
 	subProgram.option(
 		"--engine <engine>",
 		`Encryption engine${engines.length > 0 ? "s" : ""}: ${
-			(engines.join(", "), engines.length === 1 ? engines[0] : undefined)
+			engines.length === 1 ? engines[0] : engines.join(", ")
 		}`,
-		// engines.length === 1 ? engines[0] : undefined,
+		engines.length === 1 ? engines[0] : undefined,
 	);
-	setProgramOptions(subProgram);
+	setProgramOptions({ program: subProgram, dotsecConfig });
 	subProgram.description(
 		`Encrypt .env file using ${encryptionEngineNames.join(", ")}`,
 	);

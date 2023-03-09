@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import * as ts from "typescript";
 
+// TODO: unused
 export const patchConfigFile = (options: {
 	configFile: string;
 	config?: {

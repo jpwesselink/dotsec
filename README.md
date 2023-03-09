@@ -1,35 +1,73 @@
 # dotsec
 
-The solution offers encryption and decryption of .env files to and from .sec files, the ability to run a command with the values of a .env/.sec file in its environment, and the ability to push selected .env/.sec entries to AWS Systems Manager Parameter Store and AWS Secrets Manager.
-Encrypts your .env file with the AWS Encryption SDK so you can safely commit it to your repository.
+> consider the contents of this file a work in progress, and not yet ready for consumption
+> For now see --help for more information
+
+## Installation
+
+With AWS support:
+
+```sh
+npm install dotsec @dotsec/plugin-aws
+npx dotsec --plugin @dotsec/plugin-aws aws init
+```
+
+With PKE support:
+
+```sh
+npm install dotsec @dotsec/plugin-pke
+npx dotsec --plugin @dotsec/plugin-pke pke init
+```
+
+## Usage
+
+```sh
+npx dotsec --help
+```
+
+<!-- 
+`dotsec` is a tool for managing environment variables in a secure way. Encrypted environment variables are stored in a `.sec` file, and decrypted to a `.env` file. The `.sec` file can be committed to your repository. The `.env` file should not be committed to your repository.
+
+Next to encrypting and decrypting environment variables, `dotsec` can also be used to run a command with the values of a `.env` file in its environment, or with the values of a `.sec` file in its environment.
+
+As of writing this, `dotsec` supports the following encryption providers:
+
+- [AWS Key Management Service (AWS KMS)](https://aws.amazon.com/kms/)
+- [Public-key cryptography](https://en.wikipedia.org/wiki/Public-key_cryptography)
+
+When using the AWS plugin, dotsec can also push selected `.env`/`.sec` entries to AWS Systems Manager Parameter Store, and/or AWS Secrets Manager.
+
+## Table of Contents
+
+- [Installation](#installation)
 
 ## Features
 
-- Encryption of .env files to .sec files.
-- Decryption of .sec files to .env files.
-- Run a command with the values of a .env file in its environment.
-- Run a command with the values of a .sec file in its environment.
-- Push selected .env/.sec entries to AWS Systems Manager Parameter Store.
-- Push selected .env/.sec entries to AWS Secrets Manager.
+- Encryption of `.env` files to `.sec` files.
+- Decryption of `.sec` files to `.env` files.
+- Run a command with the values of a `.env` file in its environment.
+- Run a command with the values of a `.sec` file in its environment.
+- Push selected `.env`/`.sec` entries to AWS Systems Manager Parameter Store.
+- Push selected `.env`/`.sec` entries to AWS Secrets Manager.
 - Holds no opinion on how you should manage your organization's user roles and permissions, you know best.
 
 ### AWS plugin
 
 - Supported KMS key types: symmetric and assymetric:
-  - SYMMETRIC_DEFAULT
-  - RSA_2048
-    - RSAES_OAEP_SHA_256
-  - RSA_3072
-    - RSAES_OAEP_SHA_256
-  - RSA_4096
-    - RSAES_OAEP_SHA_256
-  - SM2PKE
+  - `SYMMETRIC_DEFAULT`
+  - `RSA_2048`
+    - `RSAES_OAEP_SHA_256`
+  - `RSA_3072`
+    - `RSAES_OAEP_SHA_256`
+  - `RSA_4096`
+    - `RSAES_OAEP_SHA_256`
+  - `SM2PKE`
 
 ## Requirements
 
 - For initialisation enough credentials for creating a KMS key, and alias.
 - For usage enough credentials for using the KMS key to encrypt and/or decrypt.
-- An AWS KMS key with an alias.
+- An AWS KMS key with an alias. -->
 <!-- 
 ## Usage
 
@@ -47,15 +85,15 @@ Take not of the `KeyMetadata.KeyId` value, and create an alias for it:
 aws kms create-alias --alias-name alias/dotsec --target-key-id <key-id>
 ```
 
-### Execute a command and use the values of a .env file in its environment
+### Execute a command and use the values of a `.env` file in its environment
 
-Create a .env file if you don't have one already, and add some values:
+Create a `.env` file if you don't have one already, and add some values:
 
 ```sh
-echo "MY_FANCY_ENV_VAR='yes yes yallzies'\nHEY_HO='Let\'s go'" > .env
+echo "MY_FANCY_ENV_VAR='yes yes yallzies'\nHEY_HO='Let\'s go'" > `.env`
 ```
 
-The following command will create an encrypted version of the `.env` file, and store it in a file called `.sec`. It will also create a config file called `dotsec.config.ts` which contains the KMS key alias, and AWS region. (Note: you don't have to add the key alias and region to the config file, you can also pass them as options to the dotsec aws sub command. See `dotsec init aws --help` for more information.)
+The following command will create an encrypted version of the ``.env`` file, and store it in a file called ``.sec``. It will also create a config file called `dotsec.config.ts` which contains the KMS key alias, and AWS region. (Note: you don't have to add the key alias and region to the config file, you can also pass them as options to the dotsec aws sub command. See `dotsec init aws --help` for more information.)
 
 ```sh
 npx dotsec init --aws-region eu-west-1 [--aws-key-alias alias/dotsec]
@@ -63,28 +101,28 @@ npx dotsec init --aws-region eu-west-1 [--aws-key-alias alias/dotsec]
 
 The following files will be created:
 
-- `.sec` - The encrypted version of the `.env` file.
+- ``.sec`` - The encrypted version of the ``.env`` file.
 - `dotsec.config.ts` - The config file containing the KMS key alias and AWS region.
 
 ### Add files to Git
 
-Add the `.sec` and `dotsec.config.ts` files to your repository, and commit these accordingly.
+Add the ``.sec`` and `dotsec.config.ts` files to your repository, and commit these accordingly.
 
-### Run a process with your .env file
+### Run a process with your `.env` file
 
 ```sh
-npx dotsec run --env .env command env
+npx dotsec run --env `.env` command env
 ```
 
-### Run a process with your .sec file
+### Run a process with your `.sec` file
 
 ```sh
-npx dotsec run --sec .sec command env
+npx dotsec run --sec `.sec` command env
 ```
 
 For more options see `dotsec run --help`.
 
-### Decrypt a .sec file to .env
+### Decrypt a `.sec` file to `.env`
 
 ```sh
 npx dotsec decrypt
@@ -92,7 +130,7 @@ npx dotsec decrypt
 
 For more options see `dotsec decrypt --help`.
 
-### Encrypt a .env file to .sec
+### Encrypt a `.env` file to `.sec`
 
 ```sh
 npx dotsec encrypt
@@ -100,7 +138,7 @@ npx dotsec encrypt
 
 For more options see `dotsec encrypt --help`.
 
-### Push selected .env/.sec entries to AWS Systems Manager Parameter Store
+### Push selected `.env`/`.sec` entries to AWS Systems Manager Parameter Store
 
 Take your favorite editor, and edit the `dotsec.config.ts` file. Add the following to the `aws` object:
 
@@ -124,7 +162,7 @@ Take your favorite editor, and edit the `dotsec.config.ts` file. Add the followi
 npx dotsec push --env --to-aws-ssm
 ```
 
-### Push selected .env/.sec entries to AWS Secrets Manager
+### Push selected `.env`/`.sec` entries to AWS Secrets Manager
 
 Take your favorite editor, and edit the `dotsec.config.ts` file. Add the following to the `aws` object:
 
@@ -147,12 +185,12 @@ Take your favorite editor, and edit the `dotsec.config.ts` file. Add the followi
 ```sh
 npx dotsec push --env --to-aws-secrets-manager
 ``` -->
-
+<!-- 
 ### FAQ
 
-#### Is it safe to commit a `.sec` and `dotsec.config.ts` file alongside your code?
+#### Is it safe to commit a ``.sec`` and `dotsec.config.ts` file alongside your code?
 
-Yes it is. But it is up to you to make sure that access to the KMS key is restricted to the people who need to decrypt and/or encrypt the `.sec` file.
+Yes it is. But it is up to you to make sure that access to the KMS key is restricted to the people who need to decrypt and/or encrypt the ``.sec`` file.
 
 #### Should I use this in production?
 
@@ -163,7 +201,7 @@ We do, however, since this package is relatively new, I don't think you should.
 - Write some tests already.
 - Add support in-code use like `dotsec.config()`
 - Add support for Node preload modules like `node -r dotsec/register index.js`
-- Add watcher for `.env` file changes and automatically encrypt
+- Add watcher for ``.env`` file changes and automatically encrypt
 - Write guide on postinstall for npm/yarn/pnpm
 - Add chunking for encoding larger files with assymetric keys. Current limit is 4kb.
 - Add support for other encryption SDKs like GCP KMS, Azure Key Vault, etc.
@@ -174,4 +212,4 @@ We do, however, since this package is relatively new, I don't think you should.
 
 - The only supported encryption SDK is the AWS Encryption SDK. For now.
 - Assymetric keys are supported, but the encrypted file size is limited to the payload size of the key. Until chunking is implemented, that is.
-- AWS Secrets Manager secrets which are marked for deletion **cannot** be updated until the deletion is complete. As of writing, the minimum deletion time is 7 days. This means that if you want to update a deleted AWS Secrets Manager secret, you have to wait at least 7 days before you can update it again. This is a limitation of AWS Secrets Manager, not dotsec
+- AWS Secrets Manager secrets which are marked for deletion **cannot** be updated until the deletion is complete. As of writing, the minimum deletion time is 7 days. This means that if you want to update a deleted AWS Secrets Manager secret, you have to wait at least 7 days before you can update it again. This is a limitation of AWS Secrets Manager, not dotsec -->

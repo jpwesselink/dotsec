@@ -37,6 +37,7 @@
         "next-env.d.ts",
         "**/*.ts",
         "**/*.tsx",
-        ".tmp/dotsec.ts"
+        ".tmp/dotsec.ts",
+        ".tmp/pull.ts"
     ]
 }

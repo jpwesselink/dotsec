@@ -1,47 +1,24 @@
-import { MagicalDotsecConfig } from "./packages/dotsec/src/index";
-import { DotsecPluginAws } from "./packages/plugin-aws/src/index";
+import type { DotsecPluginAws } from "@dotsec/plugin-aws";
+import type { DotsecConfig } from "dotsec";
 
-// type Expand<T> = T extends infer O ? { [K in keyof O]: O[K] } : never;
-
-// // expands object types recursively
-// type ExpandRecursively<T> = T extends object
-// 	? T extends infer O
-// 		? { [K in keyof O]: ExpandRecursively<O[K]>
-// 		  }
-// 		: never
-// 	: T;
-
-export const dotsec: MagicalDotsecConfig<{
+export const dotsec: DotsecConfig<{
 	plugins: DotsecPluginAws;
 }> = {
-	plugins: {
-		aws: {
-			module: "@dotsec/plugin-aws",
-			region: "eu-central-1",
-			kms: {
-				keyAlias: "alias/dotsec",
-			},
-			ssm: {
-				type: "SecureString",
+	defaults: {
+		encryptionEngine: "aws",
+
+		plugins: {
+			aws: {
+				kms: {},
 			},
 		},
 	},
-	// push: {
-	// 	variables: ["XXXXXX"],
-	// 	to: {
-	// 		aws: {
-	// 			ssm: true,
-	// 		},
-	// 	},
-	// },
-	// variables: {
-	// 	XXX: {
-	// 		push: {
-	// 			aws: {
-	// 				ssm: false,
-	// 				secretsManager: false,
-	// 			},
-	// 		},
-	// 	},
-	// },
+	push: {
+		ANOTHER_VAR_FOR_SSM: {
+			aws: {
+				ssm: true,
+				secretsManager: true,
+			},
+		},
+	},
 };

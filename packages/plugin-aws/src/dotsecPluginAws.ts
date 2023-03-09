@@ -1,376 +1,510 @@
-import { secretsManagerAvailableCases } from "./constants";
+import {
+	defaultRegion,
+	secretsManagerAvailableCases,
+	ssmAvailableCases,
+} from "./constants";
 import { awsEncryptionEngineFactory } from "./lib/awsEncryptionEngineFactory";
 import { createAwsSecretsManagerExecutor } from "./lib/awsSecretsManagerExecutor";
 import { createAwsSsmExecutor } from "./lib/awsSsmExecutor";
-import { DotsecPluginAws, DotsecPluginModuleConfig } from "./types";
+import { DotsecPluginAwsHandlers, expandObjectOrBoolean } from "./types";
 import { CreateSecretRequest } from "@aws-sdk/client-secrets-manager";
 import { PutParameterRequest } from "@aws-sdk/client-ssm";
 import * as changeCase from "change-case";
+import { Command } from "commander";
+import * as url from "url";
+const __dirname = url.fileURLToPath(new URL(".", import.meta.url));
 import {
-	DotsecConfig,
-	DotsecPluginModule,
 	Table,
 	promptExecute,
+	promptOverwriteIfFileExists,
+	readContentsFromFile,
 	resolveFromEnv,
+	strong,
+	writeContentsToFile,
 } from "dotsec";
+import path from "node:path";
 
-export const dotsecPluginAws: DotsecPluginModule<DotsecPluginModuleConfig> =
-	async (options) => {
-		const config = options.dotsecConfig as DotsecConfig<{
-			plugins: DotsecPluginAws;
-		}>;
+export const dotsecPluginAws: DotsecPluginAwsHandlers = async (options) => {
+	const config = options.dotsecConfig;
 
-		return {
-			name: "aws",
+	return {
+		name: "aws",
+		cliHandlers: {
+			encrypt: {
+				encryptionEngineName: "AWS KMS",
+				triggerOptionValue: "aws",
+				options: {
+					awsKeyAlias: {
+						flags: "--aws-key-alias, --awsKeyAlias <awsKeyAlias>",
+						description: "AWS KMS Key Alias",
+						env: "AWS_KEY_ALIAS",
+					},
+					awsRegion: {
+						flags: "--aws-region, --awsRegion <awsRegion>",
+						description: "AWS region",
+						env: "AWS_REGION",
+					},
+				},
+				handler: async ({ plaintext, awsKeyAlias, awsRegion }) => {
+					const keyAlias =
+						awsKeyAlias ||
+						process.env.AWS_KEY_ALIAS ||
+						config.defaults?.plugins?.aws?.kms?.keyAlias ||
+						"alias/dotsec";
 
-			api: {
-				getKmsKey: () => {
-					return Promise.resolve("123");
+					const region =
+						awsRegion ||
+						process.env.AWS_REGION ||
+						process.env.AWS_KMS_REGION ||
+						config.defaults?.plugins?.aws?.kms?.region ||
+						config.defaults?.plugins?.aws?.region ||
+						defaultRegion;
+
+					const encryptionPlugin = await awsEncryptionEngineFactory({
+						verbose: true,
+						kms: {
+							keyAlias,
+						},
+						region,
+					});
+
+					return await encryptionPlugin.encrypt(plaintext);
 				},
 			},
-			cliHandlers: {
-				encrypt: {
-					encryptionEngineName: "AWS KMS",
-					triggerOptionValue: "aws",
-					options: {
-						awsKeyAlias: [
-							"--aws-key-alias, --awsKeyAlias <awsKeyAlias>",
-							"AWS KMS Key Alias",
-						],
-						awsRegion: ["--aws-region, --awsRegion <awsRegion>", "AWS region"],
+			decrypt: {
+				encryptionEngineName: "AWS KMS",
+				triggerOptionValue: "aws",
+				options: {
+					awsKeyAlias: {
+						flags: "--aws-key-alias, --awsKeyAlias <awsKeyAlias>",
+						description: "AWS KMS Key Alias",
+						env: "AWS_KEY_ALIAS",
 					},
-					handler: async ({ plaintext, awsKeyAlias, awsRegion }) => {
-						const keyAlias =
-							awsKeyAlias ||
-							process.env.DOTSEC_AWS_KMS_KEY_ALIAS ||
-							config.defaults?.plugins?.aws?.kms?.keyAlias ||
-							"alias/dotsec";
-						const region =
-							awsRegion ||
-							process.env.AWS_REGION ||
-							process.env.DOTSEC_AWS_KMS_REGION ||
-							config.defaults?.plugins?.aws?.region ||
-							config.defaults?.plugins?.aws?.kms?.region ||
-							"us-east-1";
-
-						const encryptionPlugin = await awsEncryptionEngineFactory({
-							verbose: true,
-							kms: {
-								keyAlias,
-							},
-							region,
-						});
-
-						return await encryptionPlugin.encrypt(plaintext);
+					awsRegion: {
+						flags: "--aws-region, --awsRegion <awsRegion>",
+						description: "AWS region",
+						env: "AWS_REGION",
+					},
+					awsKmsRegion: {
+						flags: "--aws-kms-region, --awsKmsRegion <awsKmsRegion>",
+						description: "AWS KMS region",
+						env: "AWS_KMS_REGION",
 					},
 				},
-				decrypt: {
-					encryptionEngineName: "AWS KMS",
-					triggerOptionValue: "aws",
-					options: {
-						awsKeyAlias: [
-							"--aws-key-alias, --awsKeyAlias <awsKeyAlias>",
-							"AWS KMS Key Alias",
-						],
-						awsRegion: ["--aws-region, --awsRegion <awsRegion>", "AWS region"],
-					},
-					handler: async ({ ciphertext, awsKeyAlias, awsRegion }) => {
-						const keyAlias =
-							awsKeyAlias ||
-							process.env.DOTSEC_AWS_KMS_KEY_ALIAS ||
-							config.defaults?.plugins?.aws?.kms?.keyAlias ||
-							"alias/dotsec";
-						const region =
-							awsRegion ||
-							process.env.AWS_REGION ||
-							process.env.DOTSEC_AWS_KMS_REGION ||
-							config.defaults?.plugins?.aws?.region ||
-							config.defaults?.plugins?.aws?.kms?.region ||
-							"us-east-1";
-						const encryptionPlugin = await awsEncryptionEngineFactory({
-							verbose: true,
-							kms: {
-								keyAlias,
-							},
-							region,
-						});
+				handler: async ({
+					ciphertext,
+					awsKeyAlias,
+					awsRegion,
+					awsKmsRegion,
+				}) => {
+					const keyAlias =
+						awsKeyAlias ||
+						process.env.AWS_KMS_KEY_ALIAS ||
+						config.defaults?.plugins?.aws?.kms?.keyAlias ||
+						"alias/dotsec";
+					const region =
+						awsRegion ||
+						awsKmsRegion ||
+						process.env.AWS_REGION ||
+						process.env.AWS_KMS_REGION ||
+						config.defaults?.plugins?.aws?.kms?.region ||
+						config.defaults?.plugins?.aws?.region ||
+						defaultRegion;
 
-						return await encryptionPlugin.decrypt(ciphertext);
+					const encryptionPlugin = await awsEncryptionEngineFactory({
+						verbose: true,
+						kms: {
+							keyAlias,
+						},
+						region,
+					});
+
+					return await encryptionPlugin.decrypt(ciphertext);
+				},
+			},
+			push: {
+				triggerOptionValue: "aws",
+				usage: 'do stuff with "aws"',
+				description:
+					"Pushes .env or .sec files to AWS SSM or AWS Secrets Manager",
+				options: {
+					awsSsmChangeCase: {
+						flags:
+							"--aws-ssm-change-case, --awsSsmChangeCase <awsSsmChangeCase>",
+						description: "Change case for AWS SSM parameter names",
+						env: "AWS_SSM_CHANGE_CASE",
+						choices: [...ssmAvailableCases],
+					},
+					awsSsmRegion: {
+						flags: "--aws-ssm-region, --awsSsmRegion <awsSsmRegion>",
+						description: "AWS SSM region, overrides awsRegion",
+						env: "AWS_SSM_REGION",
+					},
+					awsSecretsManagerChangeCase: {
+						flags:
+							"--aws-secrets-manager-change-case, --awsSecretsManagerChangeCase <awsSecretsManagerChangeCase>",
+						description: "Change case for AWS Secrets Manager secret names",
+						env: "AWS_SECRETS_MANAGER_CHANGE_CASE",
+						choices: [...secretsManagerAvailableCases],
+					},
+					awsSecretsManagerRegion: {
+						flags:
+							"--aws-secrets-manager-region, --awsSecretsManagerRegion <awsSecretsManagerRegion>",
+						description: "AWS Secrets Manager region, overrides awsRegion",
+						env: "AWS_SECRETS_MANAGER_REGION",
 					},
 				},
-				push: {
-					triggerOptionValue: "aws",
-					options: {
-						awsRegion: ["--aws-region, --awsRegion <awsRegion>", "AWS region"],
-					},
-					handler: async ({ variables, awsRegion, yes }) => {
-						const ssmDefaultOptions = config?.defaults?.plugins?.aws?.ssm;
+				handler: async ({
+					push,
+					awsRegion,
+					awsSsmRegion,
+					awsSsmPathPrefix,
+					awsSsmChangeCase,
+					awsSsmType,
+					awsSecretsManagerRegion,
+					awsSecretsManagerPathPrefix,
+					awsSecretsManagerChangeCase,
+					yes,
+				}) => {
+					const ssmDefaultOptions = config?.defaults?.plugins?.aws?.ssm;
+					const ssmRegion =
+						awsSsmRegion ||
+						// cli option
+						awsRegion ||
+						// aws plugin ssm config default
+						ssmDefaultOptions?.region ||
+						// aws plugin config default
+						config.defaults?.plugins?.aws?.region ||
+						// default
+						defaultRegion;
 
-						const ssmDefaultParameterType =
-							ssmDefaultOptions?.type || "SecureString";
-						if (ssmDefaultParameterType) {
-							// validate
-							if (
-								!["String", "SecureString"].includes(ssmDefaultParameterType)
-							) {
+					const ssmParameterType =
+						awsSsmType || ssmDefaultOptions?.type || "String";
+
+					const ssmPathPrefixFromEnv = resolveFromEnv({
+						env: process.env,
+						fromEnvValue: awsSsmPathPrefix || ssmDefaultOptions?.pathPrefix,
+						variables: push,
+					});
+
+					if (ssmParameterType) {
+						// validate
+						if (!["String", "SecureString"].includes(ssmParameterType)) {
+							throw new Error(
+								`Invalid global parameter type for ssm, must be 'String' or 'SecureString', but got ${ssmParameterType}`,
+							);
+						}
+					} else {
+						throw new Error(
+							`Invalid global parameter type for ssm, must be 'String' or 'SecureString', but got ${ssmParameterType}`,
+						);
+					}
+
+					// validate that path prefix should start and end with a slash
+					if (
+						ssmPathPrefixFromEnv &&
+						!ssmPathPrefixFromEnv.startsWith("/") &&
+						!ssmPathPrefixFromEnv.endsWith("/")
+					) {
+						throw new Error(
+							`Invalid global path prefix for ssm, must start and end with a slash, but got ${ssmPathPrefixFromEnv}`,
+						);
+					}
+
+					const ssmChangeCase =
+						awsSsmChangeCase || ssmDefaultOptions?.changeCase;
+					const ssmTransformCase = (str: string) => {
+						if (ssmChangeCase) {
+							return changeCase[ssmChangeCase](str);
+						}
+						return str;
+					};
+					// secrets manager
+					// secrets manager defaults
+					const secretsManagerDefaultOptions =
+						config?.defaults?.plugins?.aws?.secretsManager;
+					const secretsManagerRegion =
+						// cli option
+						awsSecretsManagerRegion ||
+						awsRegion ||
+						secretsManagerDefaultOptions?.region ||
+						config.defaults?.plugins?.aws?.region ||
+						defaultRegion;
+
+					const secretsManagerPathPrefixFromEnv = resolveFromEnv({
+						env: process.env,
+						fromEnvValue:
+							awsSecretsManagerPathPrefix ||
+							secretsManagerDefaultOptions?.pathPrefix,
+						variables: push,
+					});
+					// validate that path prefix should start and end with a slash
+					if (
+						secretsManagerPathPrefixFromEnv &&
+						!secretsManagerPathPrefixFromEnv.startsWith("/") &&
+						!secretsManagerPathPrefixFromEnv.endsWith("/")
+					) {
+						throw new Error(
+							`Invalid global path prefix for secrets manager, must start and end with a slash, but got ${secretsManagerPathPrefixFromEnv}`,
+						);
+					}
+
+					const secretsManagerChangeCase =
+						awsSecretsManagerChangeCase ||
+						secretsManagerDefaultOptions?.changeCase;
+					const secretsManagerTransformCase = (str: string) => {
+						if (secretsManagerChangeCase) {
+							if (!changeCase[secretsManagerChangeCase]) {
 								throw new Error(
-									`Invalid global parameter type for ssm, must be 'String' or 'SecureString', but got ${ssmDefaultParameterType}`,
+									`Invalid global change case for secrets manager, must be one of ${secretsManagerAvailableCases.join(
+										", ",
+									)}, but got ${secretsManagerChangeCase}`,
 								);
 							}
+							return changeCase[secretsManagerChangeCase](str);
 						}
-
-						const ssmDefaultRegion = ssmDefaultOptions?.region || awsRegion;
-						const ssmDefaultFromEnv = resolveFromEnv({
-							env: process.env,
-							fromEnvValue: ssmDefaultOptions?.pathPrefix,
-							variables,
-						});
-						// validate that path prefix should start and end with a slash
-						if (
-							ssmDefaultFromEnv &&
-							!ssmDefaultFromEnv.startsWith("/") &&
-							!ssmDefaultFromEnv.endsWith("/")
-						) {
-							throw new Error(
-								`Invalid global path prefix for ssm, must start and end with a slash, but got ${ssmDefaultFromEnv}`,
-							);
-						}
-
-						const ssmDefaultChangeCase = ssmDefaultOptions?.changeCase;
-						const ssmTransformCase = (str: string) => {
-							if (ssmDefaultChangeCase) {
-								return changeCase[ssmDefaultChangeCase](str);
-							}
-							return str;
-						};
-						// secrets manager defaults
-						const secretsManagerDefaultOptions =
-							config?.defaults?.plugins?.aws?.secretsManager;
-
-						const secretsManagerDefaultFromEnv = resolveFromEnv({
-							env: process.env,
-							fromEnvValue: secretsManagerDefaultOptions?.pathPrefix,
-							variables,
-						});
-						// validate that path prefix should start and end with a slash
-						if (
-							secretsManagerDefaultFromEnv &&
-							!secretsManagerDefaultFromEnv.startsWith("/") &&
-							!secretsManagerDefaultFromEnv.endsWith("/")
-						) {
-							throw new Error(
-								`Invalid global path prefix for secrets manager, must start and end with a slash, but got ${secretsManagerDefaultFromEnv}`,
-							);
-						}
-
-						const secretsManagerDefaultRegion =
-							secretsManagerDefaultOptions?.region || awsRegion;
-
-						const secretsManagerDefaultChangeCase =
-							secretsManagerDefaultOptions?.changeCase;
-						const secretsManagerTransformCase = (str: string) => {
-							if (secretsManagerDefaultChangeCase) {
-								if (!changeCase[secretsManagerDefaultChangeCase]) {
-									throw new Error(
-										`Invalid global change case for secrets manager, must be one of ${secretsManagerAvailableCases.join(
-											", ",
-										)}, but got ${secretsManagerDefaultChangeCase}`,
+						return str;
+					};
+					const tasks = Object.entries(push).reduce<{
+						ssm: (PutParameterRequest & {
+							envVariableName: string;
+						})[];
+						secretsManager: (CreateSecretRequest & {
+							envVariableName: string;
+						})[];
+					}>(
+						(acc, [key, value]) => {
+							const configVariable = config?.push?.[key];
+							if (configVariable) {
+								if (configVariable?.aws?.ssm) {
+									// unbox boolean
+									const ssmVariableDefaults = expandObjectOrBoolean(
+										configVariable?.aws?.ssm,
 									);
-								}
-								return changeCase[secretsManagerDefaultChangeCase](str);
-							}
-							return str;
-						};
-						const tasks = Object.entries(variables).reduce<{
-							ssm: (PutParameterRequest & {
-								envVariableName: string;
-							})[];
-							secretsManager: (CreateSecretRequest & {
-								envVariableName: string;
-							})[];
-						}>(
-							(acc, [key, value]) => {
-								const configVariable = config?.variables?.[key];
-								if (configVariable) {
-									if (configVariable.push?.aws?.ssm) {
-										const ssmVariableDefaults =
-											typeof configVariable.push?.aws?.ssm === "boolean"
-												? {}
-												: configVariable.push?.aws?.ssm;
 
-										const ssmVariableParameterType = ssmVariableDefaults?.type;
-										const ssmVariableName = ssmVariableDefaults?.name;
+									const ssmVariableParameterType = ssmVariableDefaults?.type;
+									const ssmVariableName = ssmVariableDefaults?.name;
 
-										if (ssmVariableParameterType) {
-											// validate
-											if (
-												!["String", "SecureString"].includes(
-													ssmVariableParameterType,
-												)
-											) {
-												throw new Error(
-													`Invalid parameter type for ssm, must be 'String' or 'SecureString', but got ${ssmVariableParameterType}`,
-												);
-											}
-										}
-										const ssmVariableFromEnv = resolveFromEnv({
-											env: process.env,
-											fromEnvValue: ssmVariableDefaults?.pathPrefix,
-											variables,
-										});
-
-										// validate that path prefix should start and end with a slash
+									if (ssmVariableParameterType) {
+										// validate
 										if (
-											ssmVariableFromEnv &&
-											!ssmVariableFromEnv.startsWith("/") &&
-											!ssmVariableFromEnv.endsWith("/")
+											!["String", "SecureString"].includes(
+												ssmVariableParameterType,
+											)
 										) {
 											throw new Error(
-												`Invalid path prefix for ssm, must start and end with a slash, but got ${ssmVariableFromEnv}`,
+												`Invalid parameter type for ssm, must be 'String' or 'SecureString', but got ${ssmVariableParameterType}`,
 											);
 										}
+									}
+									const ssmVariableFromEnv = resolveFromEnv({
+										env: process.env,
+										fromEnvValue: ssmVariableDefaults?.pathPrefix,
+										variables: push,
+									});
 
-										const ssmParameterName = ssmTransformCase(
-											ssmVariableName || key,
+									// validate that path prefix should start and end with a slash
+									if (
+										ssmVariableFromEnv &&
+										!ssmVariableFromEnv.startsWith("/") &&
+										!ssmVariableFromEnv.endsWith("/")
+									) {
+										throw new Error(
+											`Invalid path prefix for ssm, must start and end with a slash, but got ${ssmVariableFromEnv}`,
 										);
-										// push to ssm
-										acc["ssm"].push({
-											envVariableName: key,
-											Name:
-												(ssmVariableFromEnv || ssmDefaultFromEnv) +
-												ssmParameterName,
-											Value: value,
-											Type: ssmVariableParameterType || ssmDefaultParameterType,
-										});
 									}
-									if (configVariable.push?.aws?.secretsManager) {
-										const secretsManagerPushOptions =
-											typeof configVariable.push?.aws?.secretsManager ===
-											"boolean"
-												? {}
-												: configVariable.push?.aws?.secretsManager;
 
-										const secretsManagerVariableFromEnv = resolveFromEnv({
-											env: process.env,
-											fromEnvValue: secretsManagerPushOptions?.pathPrefix,
-											variables,
-										});
-
-										const secretsManagerVariableName =
-											secretsManagerPushOptions?.name;
-
-										// validate that path prefix should start and end with a slash
-										if (
-											secretsManagerVariableFromEnv &&
-											!secretsManagerVariableFromEnv.startsWith("/") &&
-											!secretsManagerVariableFromEnv.endsWith("/")
-										) {
-											throw new Error(
-												`Invalid path prefix for secrets manager, must start and end with a slash, but got ${secretsManagerVariableFromEnv}`,
-											);
-										}
-
-										const secretsManagerParameterName =
-											secretsManagerTransformCase(
-												secretsManagerVariableName || key,
-											);
-
-										const secretName =
-											(secretsManagerVariableFromEnv ||
-												secretsManagerDefaultFromEnv) +
-											secretsManagerParameterName;
-
-										if (secretName.match(/^[A-Za-z0-9-/_.+=@]*$/) === null) {
-											throw new Error(
-												`Invalid secret name for secrets manager, must match the regular expression [A-Za-z0-9-/_.+=@]*, but got ${secretName}`,
-											);
-										}
-
-										// push to secrets manager
-										acc["secretsManager"].push({
-											envVariableName: key,
-											Name:
-												(secretsManagerVariableFromEnv ||
-													secretsManagerDefaultFromEnv) +
-												secretsManagerParameterName,
-											SecretString: value,
-										});
-									}
+									const ssmParameterName = ssmTransformCase(
+										ssmVariableName || key,
+									);
+									// push to ssm
+									acc["ssm"].push({
+										envVariableName: key,
+										Name:
+											(ssmVariableFromEnv || ssmPathPrefixFromEnv) +
+											ssmParameterName,
+										Value: value,
+										Type: ssmVariableParameterType || ssmParameterType,
+									});
 								}
+								if (configVariable?.aws?.secretsManager) {
+									const secretsManagerPushOptions = expandObjectOrBoolean(
+										configVariable?.aws?.secretsManager,
+									);
 
-								return acc;
-							},
-							{ ssm: [], secretsManager: [] },
+									const secretsManagerVariableFromEnv = resolveFromEnv({
+										env: process.env,
+										fromEnvValue: secretsManagerPushOptions?.pathPrefix,
+										variables: push,
+									});
+
+									const secretsManagerVariableName =
+										secretsManagerPushOptions?.name;
+
+									// validate that path prefix should start and end with a slash
+									if (
+										secretsManagerVariableFromEnv &&
+										!secretsManagerVariableFromEnv.startsWith("/") &&
+										!secretsManagerVariableFromEnv.endsWith("/")
+									) {
+										throw new Error(
+											`Invalid path prefix for secrets manager, must start and end with a slash, but got ${secretsManagerVariableFromEnv}`,
+										);
+									}
+
+									const secretsManagerParameterName =
+										secretsManagerTransformCase(
+											secretsManagerVariableName || key,
+										);
+
+									const secretName =
+										(secretsManagerVariableFromEnv ||
+											secretsManagerPathPrefixFromEnv) +
+										secretsManagerParameterName;
+
+									if (secretName.match(/^[A-Za-z0-9-/_.+=@]*$/) === null) {
+										throw new Error(
+											`Invalid secret name for secrets manager, must match the regular expression [A-Za-z0-9-/_.+=@]*, but got ${secretName}`,
+										);
+									}
+
+									// push to secrets manager
+									acc["secretsManager"].push({
+										envVariableName: key,
+										Name:
+											(secretsManagerVariableFromEnv ||
+												secretsManagerPathPrefixFromEnv) +
+											secretsManagerParameterName,
+										SecretString: value,
+									});
+								}
+							}
+
+							return acc;
+						},
+						{ ssm: [], secretsManager: [] },
+					);
+
+					if (tasks.ssm.length > 0) {
+						const awsSsmExecutor = await createAwsSsmExecutor({
+							region: ssmRegion,
+						});
+
+						const { execute, putParameterOverview } = await awsSsmExecutor.put(
+							tasks.ssm,
 						);
 
-						if (tasks.ssm.length > 0) {
-							const awsSsmExecutor = await createAwsSsmExecutor({
-								region: ssmDefaultRegion,
+						if (putParameterOverview.length > 0) {
+							const table = new Table({
+								head: ["Env variable", "Name", "Type", "Region"],
+							});
+							table.push(
+								...putParameterOverview.map((row) => Object.values(row)),
+							);
+							await promptExecute({
+								message: `Are you sure you want to put the following variables in AWS SSM Parameter Store?
+${table.toString()}
+`,
+								skip: yes,
+								execute: async () => {
+									await execute();
+								},
 							});
 
-							const { execute, putParameterOverview } =
-								await awsSsmExecutor.put(tasks.ssm);
-
-							if (putParameterOverview.length > 0) {
-								const table = new Table({
-									head: ["Env variable", "Name", "Type", "Region"],
-								});
-								table.push(
-									...putParameterOverview.map((row) => Object.values(row)),
+							if (yes === true) {
+								console.log(
+									"The following variables were put in AWS SSM Parameter Store:",
 								);
-								await promptExecute({
-									message: `Are you sure you want to put the following variables in AWS SSM Parameter Store?
-${table.toString()}
-`,
-									skip: yes,
-									execute: async () => {
-										await execute();
-									},
-								});
+								console.log(table.toString());
 							}
 						}
-						if (tasks.secretsManager.length > 0) {
-							const awsSecretsManagerExecutor =
-								await createAwsSecretsManagerExecutor({
-									region: secretsManagerDefaultRegion,
-								});
-							const { execute, createOrUpdateSecretsOverview } =
-								await awsSecretsManagerExecutor.createOrUpdateSecrets(
-									tasks.secretsManager,
-								);
+					}
+					if (tasks.secretsManager.length > 0) {
+						const awsSecretsManagerExecutor =
+							await createAwsSecretsManagerExecutor({
+								region: secretsManagerRegion,
+							});
+						const { execute, createOrUpdateSecretsOverview } =
+							await awsSecretsManagerExecutor.createOrUpdateSecrets(
+								tasks.secretsManager,
+							);
 
-							if (createOrUpdateSecretsOverview.length > 0) {
-								const table = new Table({
-									head: ["Env variable", "Operation", "Name", "Region"],
-								});
-								table.push(
-									...createOrUpdateSecretsOverview.map((row) =>
-										Object.values(row),
-									),
-								);
-								await promptExecute({
-									message: `Are you sure you want to create/update the following variables in AWS Secrets Manager?
+						if (createOrUpdateSecretsOverview.length > 0) {
+							const table = new Table({
+								head: ["Env variable", "Operation", "Name", "Region"],
+							});
+							table.push(
+								...createOrUpdateSecretsOverview.map((row) =>
+									Object.values(row),
+								),
+							);
+							await promptExecute({
+								message: `Are you sure you want to create/update the following variables in AWS Secrets Manager?
 ${table.toString()}
 `,
-									skip: yes,
-									execute: async () => {
-										await execute();
-									},
-								});
+								skip: yes,
+								execute: async () => {
+									await execute();
+								},
+							});
+
+							if (yes === true) {
+								console.log(
+									"The following variables were created/updated in AWS Secrets Manager:",
+								);
+								console.log(table.toString());
 							}
 						}
-						return "asd";
-					},
+					}
+
+					// return string, why
+					return "";
 				},
-				// addCliCommand: async ({ program }) => {
-				// 	program
-				// 		.enablePositionalOptions()
-				// 		.passThroughOptions()
-				// 		.command("aws")
-				// 		.action(async () => {
-				// 			console.log("OMG", config);
-				// 		});
-				// },
 			},
-		};
+		},
+		addCliCommand: async ({ program }) => {
+			const subProgram = program
+				.enablePositionalOptions()
+				.passThroughOptions()
+				.command("aws");
+
+			subProgram
+				.command("init")
+				.description("Init dotsec config file with AWS plugin")
+				.option("--yes", "Skip confirmation")
+				.action(async (_options, command: Command) => {
+					const { configFile = "dotsec.config.ts", yes } =
+						command.optsWithGlobals<{
+							configFile: string;
+							yes: boolean;
+						}>();
+
+					try {
+						// read config file from ./templates/dotsec.config.ts
+						const configTemplate = await readContentsFromFile(
+							path.resolve(__dirname, "../src/templates/dotsec.config.ts"),
+						);
+
+						const dotsecConfigOverwriteResponse =
+							await promptOverwriteIfFileExists({
+								filePath: configFile,
+								skip: yes,
+							});
+						if (
+							dotsecConfigOverwriteResponse === undefined ||
+							dotsecConfigOverwriteResponse.overwrite === true
+						) {
+							await writeContentsToFile(
+								path.resolve(process.cwd(), configFile),
+								configTemplate,
+							);
+
+							console.log(`Wrote config file to ${strong(configFile)}`);
+						}
+					} catch (e) {
+						command.error(e);
+					}
+				});
+		},
 	};
+};

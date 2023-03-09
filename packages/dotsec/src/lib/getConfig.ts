@@ -48,8 +48,8 @@ export const getMagicalConfig = async (
 							...defaultConfig.defaults?.plugins,
 						},
 					},
-					variables: {
-						...data?.variables,
+					push: {
+						...data?.push,
 					},
 				},
 			};
@@ -74,8 +74,8 @@ export const getMagicalConfig = async (
 							...defaultConfig.defaults?.plugins,
 						},
 					},
-					variables: {
-						...data?.variables,
+					push: {
+						...data?.push,
 					},
 				},
 			};

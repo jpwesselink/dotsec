@@ -1,26 +1,22 @@
 import { DotsecPlugins } from "./plugin";
 
 export type DotsecConfig<T extends DotsecPlugins = DotsecPlugins> = {
+	plugins?: Array<keyof T["plugins"]>;
 	defaults?: {
-		encryptionEngine?: keyof T["plugins"] | string;
+		encryptionEngine?: keyof T["plugins"];
 		plugins?: {
 			[PluginKey in keyof T["plugins"]]?: {
-				module?: T["plugins"][PluginKey]["module"];
+				name?: T["plugins"][PluginKey]["name"];
 			} & T["plugins"][PluginKey]["config"];
 		};
-	};
-
-	push?: {
-		variables?: string[];
-		to: {
-			[PluginKey in keyof T["plugins"]]?: T["plugins"][PluginKey]["push"];
+		options?: {
+			envFile?: string;
+			secFile?: string;
 		};
 	};
-	variables?: {
+	push?: {
 		[key: string]: {
-			push?: {
-				[PluginKey in keyof T["plugins"]]?: T["plugins"][PluginKey]["push"];
-			};
+			[PluginKey in keyof T["plugins"]]?: T["plugins"][PluginKey]["push"];
 		};
 	};
 };

@@ -1,7 +1,7 @@
-import { FromEnv } from "../types";
+import { expand } from "dotenv-expand";
 
 export const resolveFromEnv = (options: {
-	fromEnvValue?: FromEnv;
+	fromEnvValue?: string;
 	env: NodeJS.ProcessEnv;
 	variables: Record<string, string>;
 }) => {
@@ -10,19 +10,17 @@ export const resolveFromEnv = (options: {
 	if (!fromEnvValue) {
 		return "";
 	}
-	if (typeof fromEnvValue === "string") {
-		return fromEnvValue;
-	}
-	if (fromEnvValue.fromEnv in env) {
-		return env[fromEnvValue.fromEnv];
-	}
-	if (fromEnvValue.fromEnv in variables) {
-		return variables[fromEnvValue.fromEnv];
-	}
-	if (fromEnvValue.required) {
-		throw new Error(
-			`Could not resolve path prefix from environment variable "${fromEnvValue.fromEnv}"`,
-		);
-	}
-	return "";
+
+	return (
+		expand({
+			ignoreProcessEnv: true,
+			parsed: {
+				// add standard env variables
+				...(env as Record<string, string>),
+				// add custom env variables, either from .env or .sec, (or empty object if none)
+				...variables,
+				RESOLVED: fromEnvValue || "",
+			},
+		}) as { parsed?: { RESOLVED?: string } }
+	).parsed?.RESOLVED;
 };

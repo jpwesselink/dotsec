@@ -10,8 +10,13 @@ packages/*/.npmrc
 *.zip
 *.tar.gz
 yarn-error.log
-.env
-.sec
+.sec**md
+.env**md
 ./**/dist*
 .env
 .tmp
+.sec
+_dotsec.config.ts
+dotsec.config2.ts
+dotsec.configold..ts
+mekker.config.ts
