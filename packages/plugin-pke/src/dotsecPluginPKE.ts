@@ -1,7 +1,11 @@
-import { promptOverwriteIfFileExists, writeContentsToFile } from "./lib/io";
 import { DotsecPluginPKEHandlers } from "./types";
 import { Command } from "commander";
-import { readContentsFromFile, strong } from "dotsec";
+import {
+	promptOverwriteIfFileExists,
+	readContentsFromFile,
+	strong,
+	writeContentsToFile,
+} from "dotsec";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";

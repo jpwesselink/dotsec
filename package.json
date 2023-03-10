@@ -9,10 +9,7 @@
     "build": "turbo build",
     "postinstall": "lerna bootstrap",
     "prepare": "husky install",
-    "packages/dotsec": "lerna exec --scope dotsec -- yarn",
-    "dotsec/plugin-aws": "lerna exec --scope @dotsec/plugin-aws -- yarn",
-    "dotsec/plugin-pke": "lerna exec --scope @dotsec/plugin-pke -- yarn",
-    "docs": "typedoc --out ./docs/api --readme none --gitRevision $(git rev-parse --abbrev-ref HEAD) --entryPointStrategy Packages packages/dotsec"
+    "docs": "typedoc --out ./docs/api --readme none --gitRevision $(git rev-parse --abbrev-ref HEAD) --entryPointStrategy packages packages/dotsec packages/plugin-aws packages/plugin-pke"
   },
   "devDependencies": {
     "@commitlint/cli": "^17.4.4",

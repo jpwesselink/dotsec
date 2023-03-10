@@ -1,0 +1,35 @@
+site_name: Dotsec
+site_author: JP Wesselink
+copyright: (c) 2023 by JP Wesselink
+repo_url: https://github.com/jpwesselink/dotsec
+nav:
+  - Dotwhat?: README.md
+  - Commands:
+      - init: commands/init.md
+      - run: commands/run.md
+      - encrypt: commands/encrypt.md
+      - decrypt: commands/decrypt.md
+      - push: commands/push.md
+  - Plugins:
+      - AWS: plugins/aws.md
+      - PKE: plugins/pke.md
+  - Reference:
+      - dotsec.config.ts: reference/config.md
+theme:
+  name: material
+  features:
+    - navigation.indexes
+    - navigation.sections
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      accent: purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: black
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode

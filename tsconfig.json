@@ -1,7 +1,8 @@
 {
     "compilerOptions": {
         "lib": [
-            "es2020"
+            "es2020",
+            "dom"
         ],
         "removeComments": true,
         "moduleResolution": "nodenext",
@@ -36,8 +37,6 @@
     "include": [
         "next-env.d.ts",
         "**/*.ts",
-        "**/*.tsx",
-        ".tmp/dotsec.ts",
-        ".tmp/pull.ts"
+        "**/*.tsx"
     ]
 }
