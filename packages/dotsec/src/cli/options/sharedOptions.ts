@@ -66,10 +66,10 @@ export const createManifestOption: ExpandedCommandOption = {
 	env: "CREATE_MANIFEST",
 };
 
-export const manifestFileOption: ExpandedCommandOption = {
+export const manifestFilePrefixOption: ExpandedCommandOption = {
 	option: [
-		"--manifest-file <manifestFile>",
-		"Specify the name of the manifest file to create.",
+		"--manifest-file-prefix <manifestFilePrefix>",
+		"Mmanifest file prefix",
 	],
 	env: "ENCRYPTION_MANIFEST_FILE",
 };

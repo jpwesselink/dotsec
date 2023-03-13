@@ -1,4 +1,4 @@
-# Dotwhat?
+# Dotsec
 
 > consider the contents of this file a work in progress, and not yet ready for consumption
 > For now see --help for more information

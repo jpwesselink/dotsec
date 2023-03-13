@@ -2,7 +2,7 @@ import {
 	configFileOption,
 	createManifestOption,
 	envFileOption,
-	manifestFileOption,
+	manifestFilePrefixOption,
 	secFileOption,
 	yesOption,
 } from "./sharedOptions";
@@ -15,7 +15,7 @@ const decryptCommandDefaults: DotSecCommandsDefaults = {
 			envFile: envFileOption,
 			secFile: secFileOption,
 			createManifest: createManifestOption,
-			manifestFile: manifestFileOption,
+			manifestFilePrefix: manifestFilePrefixOption,
 			yes: yesOption,
 		},
 		description: "Decrypt a sec file",
@@ -37,7 +37,7 @@ Specify a different .env file
 $ npx dotsec decrypt --env-file .env.dev
 $ ENV_FILE=.env.dev npx dotsec decrypt
 
-Write a manifest file
+Write a manifest markdown file
 
 $ npx dotsec decrypt --create-manifest
 $ CREATE_MANIFEST=true npx dotsec decrypt
@@ -45,7 +45,7 @@ $ CREATE_MANIFEST=true npx dotsec decrypt
 Specify a different manifest file
 
 $ npx dotsec decrypt --manifest-file .manifest.dev
-$ MANIFEST_FILE=.manifest.dev npx dotsec decrypt
+$ MANIFEST_FILE=decryption-manifest.md npx dotsec decrypt
 `,
 	},
 };

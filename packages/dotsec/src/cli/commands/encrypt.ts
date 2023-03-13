@@ -88,7 +88,10 @@ const addEncryptProgram = async (
 						)}`,
 					);
 
-					if (createManifest) {
+					if (
+						createManifest ||
+						dotsecConfig?.defaults?.options?.createManifest
+					) {
 						// parse raw env contents into key value pairs using the dotenv package
 						const dotenvVars = parse(dotenvString);
 						// expand env vars

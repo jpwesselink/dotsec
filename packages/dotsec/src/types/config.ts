@@ -12,6 +12,7 @@ export type DotsecConfig<T extends DotsecPlugins = DotsecPlugins> = {
 		options?: {
 			envFile?: string;
 			secFile?: string;
+			createManifest?: boolean;
 		};
 	};
 	push?: {

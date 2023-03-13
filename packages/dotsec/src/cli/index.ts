@@ -64,7 +64,7 @@ const program = new Command();
 		.name("dotsec")
 		.description(".env, but secure")
 		.version("1.0.0")
-		.enablePositionalOptions()
+		.passThroughOptions()
 		.action((_options, other: Command) => {
 			other.help();
 		});
