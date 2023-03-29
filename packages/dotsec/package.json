@@ -1,6 +1,6 @@
 {
     "name": "dotsec",
-    "version": "4.0.0-alpha.8",
+    "version": "4.0.0-alpha.9",
     "description": "",
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
@@ -43,7 +43,7 @@
         "@types/node": "^18.14.6",
         "@types/prompts": "^2.0.14",
         "@types/yargs-parser": "^21.0.0",
-        "tsup": "^6.6.3"
+        "tsup": "^6.7.0"
     },
     "dependencies": {
         "@npmcli/arborist": "^6.1.4",
