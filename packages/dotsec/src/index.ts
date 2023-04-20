@@ -10,6 +10,8 @@ export type {
 	DotsecPluginModuleBuilderConfig,
 	DotsecConfig,
 } from "./types";
+export { parse } from "./lib/parse";
+export type { ParseResult } from "./lib/parse";
 export { promptExecute } from "./utils/prompts";
 export { resolveFromEnv } from "./utils/fromEnv";
 export {

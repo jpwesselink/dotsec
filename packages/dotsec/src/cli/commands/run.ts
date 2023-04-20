@@ -1,10 +1,10 @@
 import fs from "node:fs";
 
 import { Command } from "commander";
-import { parse } from "dotenv";
 import { expand } from "dotenv-expand";
 
 import { addPluginOptions } from "../../lib/addPluginOptions";
+import { parse } from "../../lib/parse";
 import { RunCommandOptions } from "../../types";
 import { DotsecConfig } from "../../types/config";
 import { DotsecCliPluginDecryptHandler } from "../../types/plugin";
@@ -88,7 +88,7 @@ const addRunProgam = (
 						});
 					}
 					if (envContents) {
-						const dotenvVars = parse(envContents);
+						const dotenvVars = parse(envContents).obj;
 						// expand env vars
 						const expandedEnvVars = expand({
 							ignoreProcessEnv: true,

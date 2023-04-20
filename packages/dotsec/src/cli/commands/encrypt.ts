@@ -4,13 +4,13 @@ import {
 	readContentsFromFile,
 	writeContentsToFile,
 } from "../../lib/io";
+import { parse } from "../../lib/parse";
 import { EncryptCommandOptions } from "../../types";
 import { DotsecConfig } from "../../types/config";
 import { DotsecCliPluginEncryptHandler } from "../../types/plugin";
 import { strong } from "../../utils/logging";
 import { setProgramOptions } from "../options";
 import { Command } from "commander";
-import { parse } from "dotenv";
 
 type Formats = {
 	env?: string;
@@ -67,9 +67,15 @@ const addEncryptProgram = async (
 				);
 
 				const dotenvString = await readContentsFromFile(envFile);
-
+				let dotsecString: string | undefined;
+				try {
+					dotsecString = await readContentsFromFile(secFile);
+				} catch (e) {
+					// ignore
+				}
 				const cipherText = await pluginCliEncrypt.handler({
 					plaintext: dotenvString,
+					ciphertext: dotsecString,
 					...allOptionsValues,
 				});
 
@@ -93,7 +99,7 @@ const addEncryptProgram = async (
 						dotsecConfig?.defaults?.options?.createManifest
 					) {
 						// parse raw env contents into key value pairs using the dotenv package
-						const dotenvVars = parse(dotenvString);
+						const dotenvVars = parse(dotenvString).obj;
 						// expand env vars
 						const markdownManifest = `# Dotsec encryption manifest 
 

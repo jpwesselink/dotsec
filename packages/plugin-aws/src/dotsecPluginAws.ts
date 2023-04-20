@@ -45,7 +45,7 @@ export const dotsecPluginAws: DotsecPluginAwsHandlers = async (options) => {
 						env: "AWS_REGION",
 					},
 				},
-				handler: async ({ plaintext, awsKeyAlias, awsRegion }) => {
+				handler: async ({ plaintext, ciphertext, awsKeyAlias, awsRegion }) => {
 					const keyAlias =
 						awsKeyAlias ||
 						process.env.AWS_KEY_ALIAS ||
@@ -68,7 +68,7 @@ export const dotsecPluginAws: DotsecPluginAwsHandlers = async (options) => {
 						region,
 					});
 
-					return await encryptionPlugin.encrypt(plaintext);
+					return await encryptionPlugin.encrypt(plaintext, ciphertext);
 				},
 			},
 			decrypt: {
@@ -134,6 +134,11 @@ export const dotsecPluginAws: DotsecPluginAwsHandlers = async (options) => {
 						description: "Change case for AWS SSM parameter names",
 						env: "AWS_SSM_CHANGE_CASE",
 						choices: [...ssmAvailableCases],
+					},
+					awsRegion: {
+						flags: "--aws-region, --awsRegion <awsRegion>",
+						description: "AWS region, overrides awsRegion",
+						env: "AWS_REGION",
 					},
 					awsSsmRegion: {
 						flags: "--aws-ssm-region, --awsSsmRegion <awsSsmRegion>",
@@ -474,6 +479,7 @@ ${table.toString()}
 				.option("--yes", "Skip confirmation")
 				.action(async (_options, command: Command) => {
 					const { configFile = "dotsec.config.ts", yes } =
+						// @ts-ignore
 						command.optsWithGlobals<{
 							configFile: string;
 							yes: boolean;

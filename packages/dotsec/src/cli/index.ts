@@ -50,14 +50,13 @@ const program = new Command();
 			argvPluginModules.push(parsedOptions.plugin);
 		}
 	}
+
+	const someConfigFile = parsedOptions.configFile || parsedOptions.c;
+
 	const configFile =
 		[
-			...(Array.isArray(parsedOptions.configFile)
-				? parsedOptions.configFile
-				: [parsedOptions.configFile]),
-			...(Array.isArray(parsedOptions.c) ? parsedOptions.c : [parsedOptions.c]),
+			...(Array.isArray(someConfigFile) ? someConfigFile : [someConfigFile]),
 		]?.[0] || process.env.DOTSEC_CONFIG_FILE;
-
 	const { contents: dotsecConfig = {} } = await getMagicalConfig(configFile);
 	const { defaults = {}, push: pushVariables, plugins } = dotsecConfig;
 	program

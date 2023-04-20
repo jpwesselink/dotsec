@@ -28,8 +28,14 @@
         "paths": {
             "@dotsec/*": [
                 "./packages/*/"
-            ]
-        }
+            ],
+            "dotsec": [
+                "./packages/dotsec/"
+            ],
+        },
+        "types": [
+            "vitest/importMeta"
+        ]
     },
     "exclude": [
         "node_modules"

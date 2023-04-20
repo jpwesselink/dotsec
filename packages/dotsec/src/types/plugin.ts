@@ -23,7 +23,11 @@ export type DotsecCliPluginHandler<
 
 export type DotsecCliPluginEncryptHandler<
 	HandlerPluginArgs extends Record<string, unknown> = Record<string, unknown>,
-> = DotsecCliPluginHandler<{ plaintext: string }, string, HandlerPluginArgs>;
+> = DotsecCliPluginHandler<
+	{ plaintext: string; ciphertext?: string },
+	string,
+	HandlerPluginArgs
+>;
 
 export type DotsecCliPluginDecryptHandler<
 	HandlerPluginArgs extends Record<string, unknown> = Record<string, unknown>,

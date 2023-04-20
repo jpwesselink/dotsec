@@ -1,4 +1,5 @@
 import { addPluginOptions } from "../../lib/addPluginOptions";
+import { parse } from "../../lib/parse";
 import { PushCommandOptions } from "../../types";
 import { DotsecConfig } from "../../types/config";
 import {
@@ -8,7 +9,6 @@ import {
 } from "../../types/plugin";
 import { setProgramOptions } from "../options/index";
 import { Command } from "commander";
-import { parse } from "dotenv";
 import { expand } from "dotenv-expand";
 import fs from "node:fs";
 
@@ -103,7 +103,7 @@ const addPushProgram = async (
 				}
 				if (envContents) {
 					// convert to object
-					const dotenvVars = parse(envContents);
+					const dotenvVars = parse(envContents).obj;
 					// expand env vars
 					const expandedEnvVars = expand({
 						ignoreProcessEnv: true,

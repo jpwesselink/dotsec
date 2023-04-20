@@ -16,7 +16,7 @@ export type DotsecEncryptionEngineFactoryProps = { verbose?: boolean };
  * @template T = {}
  */
 export type DotsecEncryptionEngine<T = Record<string, unknown>> = {
-	encrypt(plaintext: string): Promise<string>;
+	encrypt(plaintext: string, ciphertext?: string): Promise<string>;
 	decrypt(ciphertext: string): Promise<string>;
 } & T;
 

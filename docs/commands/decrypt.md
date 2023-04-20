@@ -6,6 +6,7 @@ Decrypts an encrypted sec file to a plaintext env file
 
 ```sh
 npx dotsec decrypt
+```
 
 Specify a different encrypted sec file
 
