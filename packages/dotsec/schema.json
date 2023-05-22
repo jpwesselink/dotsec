@@ -1,0 +1,197 @@
+{
+  "$ref": "#/definitions/JSONSchemaDotsecConfig",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "JSONSchemaDotsecConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "$schema": {
+          "type": "string"
+        },
+        "commands": {
+          "additionalProperties": false,
+          "properties": {
+            "push": {
+              "additionalProperties": false,
+              "properties": {
+                "to": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "aws-secrets-manager": {
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "variable": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "variable"
+                            ],
+                            "type": "object"
+                          }
+                        ]
+                      },
+                      "type": "array"
+                    },
+                    "aws-ssm": {
+                      "items": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "additionalProperties": false,
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "enum": [
+                                  "String",
+                                  "SecureString"
+                                ],
+                                "type": "string"
+                              },
+                              "variable": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "variable"
+                            ],
+                            "type": "object"
+                          }
+                        ]
+                      },
+                      "type": "array"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            }
+          },
+          "type": "object"
+        },
+        "defaults": {
+          "additionalProperties": false,
+          "properties": {
+            "aws": {
+              "additionalProperties": false,
+              "properties": {
+                "kms": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "keyAlias": {
+                      "type": "string"
+                    },
+                    "region": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "region": {
+                  "type": "string"
+                },
+                "secretsManager": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "changeCase": {
+                      "$ref": "#/definitions/SecretsManagerAvailableCases"
+                    },
+                    "pathPrefix": {
+                      "type": "string"
+                    },
+                    "region": {
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                },
+                "ssm": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "changeCase": {
+                      "$ref": "#/definitions/SsmAvailableCases"
+                    },
+                    "pathPrefix": {
+                      "type": "string"
+                    },
+                    "region": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "enum": [
+                        "String",
+                        "SecureString"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              },
+              "type": "object"
+            },
+            "defaultEncryptionMethod": {
+              "const": "aws-kms",
+              "type": "string"
+            },
+            "envFile": {
+              "type": "string"
+            },
+            "secFile": {
+              "type": "string"
+            }
+          },
+          "type": "object"
+        }
+      },
+      "required": [
+        "$schema"
+      ],
+      "type": "object"
+    },
+    "SecretsManagerAvailableCases": {
+      "enum": [
+        "camelCase",
+        "constantCase",
+        "dotCase",
+        "headerCase",
+        "noCase",
+        "paramCase",
+        "pascalCase",
+        "pathCase",
+        "snakeCase"
+      ],
+      "type": "string"
+    },
+    "SsmAvailableCases": {
+      "enum": [
+        "camelCase",
+        "capitalCase",
+        "constantCase",
+        "dotCase",
+        "headerCase",
+        "noCase",
+        "paramCase",
+        "pascalCase",
+        "pathCase",
+        "sentenceCase",
+        "snakeCase"
+      ],
+      "type": "string"
+    }
+  }
+}

@@ -9,5 +9,5 @@ export const tsup: Options = {
 	dts: true,
 	format: ["cjs", "esm"],
 	skipNodeModulesBundle: true,
-	entryPoints: ["src/cli/index.ts", "src/index.ts", "src/v2.ts"],
+	entryPoints: ["src/cli/index.ts", "src/index.ts"],
 };

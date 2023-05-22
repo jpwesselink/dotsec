@@ -1,0 +1,256 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$ref": "#/definitions/DotsecConfig",
+    "definitions": {
+        "DotsecConfig": {
+            "type": "object",
+            "properties": {
+                "envFile": {
+                    "type": "string"
+                },
+                "secFile": {
+                    "type": "string"
+                },
+                "defaultEncryptionMethod": {
+                    "type": "string",
+                    "const": "aws-kms"
+                },
+                "aws": {
+                    "type": "object",
+                    "properties": {
+                        "region": {
+                            "type": "string"
+                        },
+                        "kms": {
+                            "type": "object",
+                            "properties": {
+                                "region": {
+                                    "type": "string"
+                                },
+                                "keyAlias": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "ssm": {
+                            "type": "object",
+                            "properties": {
+                                "region": {
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "String",
+                                        "SecureString"
+                                    ]
+                                },
+                                "changeCase": {
+                                    "$ref": "#/definitions/SsmAvailableCases"
+                                },
+                                "pathPrefix": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "secretsManager": {
+                            "type": "object",
+                            "properties": {
+                                "region": {
+                                    "type": "string"
+                                },
+                                "changeCase": {
+                                    "$ref": "#/definitions/SecretsManagerAvailableCases"
+                                },
+                                "pathPrefix": {
+                                    "type": "string"
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                },
+                "commands": {
+                    "type": "object",
+                    "properties": {
+                        "push": {
+                            "type": "object",
+                            "properties": {
+                                "targets": {
+                                    "type": "object",
+                                    "properties": {
+                                        "aws-ssm": {
+                                            "type": "array",
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "path": {
+                                                                "type": "string"
+                                                            },
+                                                            "variable": {
+                                                                "type": "string"
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "enum": [
+                                                                    "String",
+                                                                    "SecureString"
+                                                                ]
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "variable"
+                                                        ],
+                                                        "additionalProperties": false
+                                                    }
+                                                ]
+                                            }
+                                        },
+                                        "aws-secrets-manager": {
+                                            "type": "array",
+                                            "items": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "path": {
+                                                                "type": "string"
+                                                            },
+                                                            "variable": {
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "variable"
+                                                        ],
+                                                        "additionalProperties": false
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    },
+                                    "additionalProperties": false
+                                },
+                                "variables": {
+                                    "type": "object",
+                                    "additionalProperties": {
+                                        "anyOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "number"
+                                            },
+                                            {
+                                                "type": "boolean"
+                                            },
+                                            {
+                                                "type": "null"
+                                            },
+                                            {
+                                                "not": {}
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "target": {
+                                                        "type": "string",
+                                                        "const": "aws-ssm"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "String",
+                                                            "SecureString"
+                                                        ]
+                                                    },
+                                                    "value": {
+                                                        "type": [
+                                                            "string",
+                                                            "number",
+                                                            "boolean",
+                                                            "null"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "target"
+                                                ],
+                                                "additionalProperties": false
+                                            },
+                                            {
+                                                "type": "object",
+                                                "properties": {
+                                                    "target": {
+                                                        "type": "string",
+                                                        "const": "aws-secrets-manager"
+                                                    },
+                                                    "value": {
+                                                        "type": [
+                                                            "string",
+                                                            "number",
+                                                            "boolean",
+                                                            "null"
+                                                        ]
+                                                    }
+                                                },
+                                                "required": [
+                                                    "target"
+                                                ],
+                                                "additionalProperties": false
+                                            }
+                                        ]
+                                    }
+                                }
+                            },
+                            "additionalProperties": false
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            },
+            "additionalProperties": false
+        },
+        "SsmAvailableCases": {
+            "type": "string",
+            "enum": [
+                "camelCase",
+                "capitalCase",
+                "constantCase",
+                "dotCase",
+                "headerCase",
+                "noCase",
+                "paramCase",
+                "pascalCase",
+                "pathCase",
+                "sentenceCase",
+                "snakeCase"
+            ]
+        },
+        "SecretsManagerAvailableCases": {
+            "type": "string",
+            "enum": [
+                "camelCase",
+                "constantCase",
+                "dotCase",
+                "headerCase",
+                "noCase",
+                "paramCase",
+                "pascalCase",
+                "pathCase",
+                "snakeCase"
+            ]
+        }
+    }
+}

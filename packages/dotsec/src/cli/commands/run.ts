@@ -80,12 +80,17 @@ const addRunProgam = (
 								return [key, _options[key]];
 							}),
 						);
-
-						const dotSecContents = fs.readFileSync(secFile, "utf8");
-						envContents = await pluginCliDecrypt.handler({
-							ciphertext: dotSecContents,
-							...allOptionsValues,
-						});
+						try {
+							const dotSecContents = fs.readFileSync(secFile, "utf8");
+							envContents = await pluginCliDecrypt.handler({
+								ciphertext: dotSecContents,
+								...allOptionsValues,
+							});
+						} catch (e) {
+							console.error("Something bad happened while decrypting.");
+							console.error(`File: ${secFile}`);
+							throw e;
+						}
 					}
 					if (envContents) {
 						const dotenvVars = parse(envContents).obj;
