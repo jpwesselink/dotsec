@@ -13,9 +13,15 @@ jobs:
         with:
           fetch-depth: "0"
 
+      - name: Install NPM dependencies
+        id: install-npm
+        shell: bash
+        run: yarn --frozen-lockfile
+
       - name: Build
         run: |
           yarn turbo build
+          
       - name: Versioning
         run: |
           git config user.name "${{ github.actor }}"
