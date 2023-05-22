@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.14](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.13...v4.0.0-alpha.14) (2023-05-22)
+
+
+### Features
+
+* test ([f6398b0](https://github.com/jpwesselink/dotsec/commit/f6398b0f6a5829be93640421aba28dd73e012df4))
+
+
+
+
+
 # [4.0.0-alpha.13](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.12...v4.0.0-alpha.13) (2023-05-22)
 
 
