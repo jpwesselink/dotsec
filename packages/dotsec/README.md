@@ -3,7 +3,6 @@
 The solution offers encryption and decryption of `.env` files to and from `.sec` files, the ability to run a command with the values of a `.env`/`.sec` file in its environment, and the ability to push selected `.env`/`.sec` entries to AWS Systems Manager Parameter Store and AWS Secrets Manager.
 Encrypts your `.env` file with the AWS Encryption SDK so you can safely commit it to your repository.
 
-
 ## Features
 
 - Encryption of `.env` files to `.sec` files.
