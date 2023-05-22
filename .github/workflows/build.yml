@@ -2,14 +2,25 @@ name: Publish docs via GitHub Pages
 on:
   push:
     branches:
-      - feat/modules
+      - main
 jobs:
   build:
     name: Deploy docs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout main
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: "0"
 
+      - name: Build
+        run: |
+          yarn turbo build
+      - name: Versioning
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor}}@users.noreply.github.com"
+          yarn lerna version --conventional-commits --yes
+        
       - run: pip install mkdocs-material
       - run: mkdocs gh-deploy --force
