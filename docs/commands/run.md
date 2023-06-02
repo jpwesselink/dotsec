@@ -41,7 +41,7 @@ npx dotsec run --using env node -e \"console.log(process.env)\"
 Run a command with a specific `.env` file
 
 ```sh
-$ npx dotsec run --using env --env-file .env node -e \"console.log(process.env)\"
+npx dotsec run --using env --env-file .env node -e \"console.log(process.env)\"
 ```
 
 Run a command with a specific `ENV_FILE` variable
@@ -56,6 +56,48 @@ You can also specify 'using' as an environment variable
 ```sh
 DOTSEC_USING=env npx dotsec run node -e \"console.log(process.env)\"
 ```
+
+## Output options
+
+By default each line output by the command will be embellished with a background color and a prefix. You can disable this behavior by using the `--show-raw-output` option.
+
+```sh
+npx dotsec run `--show-raw-output` {your command}
+```
+
+```sh
+### Output background color
+
+You can specify the output background using either the `--output-background-color` option on the command line, or the `DOTSEC_OUTPUT_BACKGROUND_COLOR` environment variable.
+
+```sh
+npx dotsec run --output-background-color red {your command}
+```
+
+```sh
+DOTSEC_OUTPUT_BACKGROUND_COLOR=yellow npx dotsec run {your command}
+```
+
+The following colors are supported:
+
+- black
+- red
+- green
+- yellow
+- blue
+- magenta
+- cyan
+- white
+- black-bright, (alias: gray, grey)
+- red-bright
+- green-bright
+- yellow-bright
+- blue-bright
+- magenta-bright
+- cyan-bright
+- white-bright
+
+
 
 ## Config file
 

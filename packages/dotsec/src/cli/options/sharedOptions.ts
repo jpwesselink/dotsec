@@ -2,6 +2,7 @@ import {
 	DOTSEC_DEFAULT_DOTENV_FILENAME,
 	DOTSEC_DEFAULT_DOTSEC_FILENAME,
 } from "../../constants";
+import { backgroundColors } from "../../types/colors";
 import { ExpandedCommandOption } from "./types";
 
 export const envFileOption: ExpandedCommandOption = {
@@ -33,6 +34,44 @@ export const usingNoEncryptionEngineOption: ExpandedCommandOption = {
 	description: "Wether to use a dot env file or a dot sec file",
 	choices: ["env"],
 	env: "DOTSEC_USING",
+};
+
+export const showRedactedOption: ExpandedCommandOption = {
+	flags: "--show-redacted",
+	description: 'Wether to show redacted values."',
+	env: "DOTSEC_SHOW_REDACTED",
+};
+
+export const embellishOutputOption: ExpandedCommandOption = {
+	flags: "--embellish-output",
+	description:
+		"Show embellished output, with (dotsec) prefix, and background color",
+	env: "DOTSEC_EMBELLISH_OUTPUT",
+};
+
+export const showOutputPrefixOption: ExpandedCommandOption = {
+	flags: "--show-output-prefix",
+	description: "Show output prefix",
+	env: "DOTSEC_SHOW_OUTPUT_PREFIX",
+};
+export const outputPrefixOption: ExpandedCommandOption = {
+	flags: "--output-prefix <outputPrefix>",
+	description: "Output prefix",
+	env: "DOTSEC_OUTPUT_PREFIX",
+};
+
+export const showOutputBackgroundColorOption: ExpandedCommandOption = {
+	flags: "--show-output-background-color",
+	description: "Show output background color",
+	env: "DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR",
+};
+
+export const outputBackgroundColorOption: ExpandedCommandOption = {
+	flags: "--output-background-color <outputBackgroundColor>",
+	description: "Background color of the output.",
+	env: "DOTSEC_OUTPUT_BACKGROUND_COLOR",
+	choices: backgroundColors as unknown as string[],
+	defaultValue: "red-bright",
 };
 
 export const yesOption: ExpandedCommandOption = {

@@ -44,7 +44,6 @@ const addPushProgram = async (
 					envFile,
 					secFile,
 					engine,
-
 					yes,
 				} = command.optsWithGlobals<PushCommandOptions>();
 

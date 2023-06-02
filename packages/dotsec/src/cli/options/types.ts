@@ -13,7 +13,7 @@ export type DeepExpandedCommandOption = {
 	flags: string;
 	description?: string;
 	defaultValue?: string | boolean | string[];
-	choices?: string[];
+	choices?: (string | boolean | string)[];
 	fn?: (value: string, previous: unknown) => unknown;
 	regexp?: RegExp;
 	env?: string;

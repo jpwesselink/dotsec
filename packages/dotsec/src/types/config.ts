@@ -1,3 +1,4 @@
+import { BackgroundColor } from "./colors";
 import { DotsecPlugins } from "./plugin";
 
 export type DotsecConfig<T extends DotsecPlugins = DotsecPlugins> = {
@@ -13,8 +14,14 @@ export type DotsecConfig<T extends DotsecPlugins = DotsecPlugins> = {
 			envFile?: string;
 			secFile?: string;
 			createManifest?: boolean;
+			showRedacted?: boolean;
+			showOutputPrefix?: boolean;
+			outputPrefix?: string;
+			showBackgroundColor?: boolean;
+			outputBackgroundColor?: BackgroundColor;
 		};
 	};
+	redaction?: { ignore?: string[] };
 	push?: {
 		[key: string]: {
 			[PluginKey in keyof T["plugins"]]?: T["plugins"][PluginKey]["push"];

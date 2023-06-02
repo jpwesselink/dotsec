@@ -1,16 +1,19 @@
 import fs from "node:fs";
 
-import { Command } from "commander";
-import { expand } from "dotenv-expand";
-
 import { addPluginOptions } from "../../lib/addPluginOptions";
 import { parse } from "../../lib/parse";
 import { RunCommandOptions } from "../../types";
+import { BackgroundColor, backgroundColors } from "../../types/colors";
 import { DotsecConfig } from "../../types/config";
 import { DotsecCliPluginDecryptHandler } from "../../types/plugin";
 import { strong } from "../../utils/logging";
 import { setProgramOptions } from "../options";
-import { spawnSync } from "node:child_process";
+import { camelCase } from "camel-case";
+import chalk from "chalk";
+
+import { Command } from "commander";
+import { expand } from "dotenv-expand";
+import { spawn } from "node:child_process";
 const addRunProgam = (
 	program: Command,
 	options: {
@@ -38,8 +41,17 @@ const addRunProgam = (
 				command: Command,
 			) => {
 				try {
-					const { envFile, using, secFile, engine } =
-						command.optsWithGlobals<RunCommandOptions>();
+					const {
+						envFile,
+						using,
+						secFile,
+						engine,
+						showRedacted,
+						outputBackgroundColor,
+						showOutputBackgroundColor,
+						showOutputPrefix,
+						outputPrefix,
+					} = command.optsWithGlobals<RunCommandOptions>();
 
 					let envContents: string | undefined;
 
@@ -106,19 +118,122 @@ const addRunProgam = (
 						});
 
 						const [userCommand, ...userCommandArgs] = commands;
-						const spawn = spawnSync(userCommand, [...userCommandArgs], {
-							stdio: "inherit",
-							shell: false,
-							encoding: "utf-8",
-							env: {
-								...expandedEnvVars.parsed,
-								...process.env,
-								__DOTSEC_ENV__: JSON.stringify(Object.keys(dotenvVars)),
-							},
+						const waiter: number | undefined = await new Promise((resolve) => {
+							const cprocess = spawn(userCommand, [...userCommandArgs], {
+								stdio: "pipe",
+								shell: false,
+								env: {
+									...expandedEnvVars.parsed,
+									...process.env,
+									__DOTSEC_ENV__: JSON.stringify(Object.keys(dotenvVars)),
+								},
+							});
+
+							const expandedEnvVarsWithoutEnv = expand({
+								ignoreProcessEnv: true,
+								parsed: {
+									// add standard env variables
+									// add custom env variables, either from .env or .sec, (or empty object if none)
+									...dotenvVars,
+								},
+							});
+
+							cprocess.stdout.setEncoding("utf8");
+
+							// hideOutputBackgroundColor;
+							let addBackgroundColor: chalk.Chalk | ((str: string) => string) =
+								showOutputBackgroundColor ||
+								dotsecConfig.defaults?.options?.showBackgroundColor
+									? chalk.bgRedBright
+									: (str: string) => str;
+							if (
+								outputBackgroundColor &&
+								(showOutputBackgroundColor ||
+									dotsecConfig.defaults?.options?.showBackgroundColor)
+							) {
+								if (
+									!backgroundColors.includes(
+										outputBackgroundColor as BackgroundColor,
+									)
+								) {
+									// throw error
+									throw new Error(
+										`Invalid background color: ${outputBackgroundColor}`,
+									);
+								}
+								const backgroundColorFnName = camelCase(
+									`bg-${outputBackgroundColor}`,
+								);
+								if (chalk[backgroundColorFnName]) {
+									addBackgroundColor = chalk[
+										backgroundColorFnName
+									] as chalk.Chalk;
+								} else {
+									console.warn(
+										`Invalid background color: ${backgroundColorFnName}, using default: red`,
+									);
+									addBackgroundColor = chalk.bgRedBright;
+								}
+							}
+
+							const prefix =
+								showOutputPrefix ||
+								dotsecConfig?.defaults?.options?.showOutputPrefix
+									? `${outputPrefix || "(dotsec) "}`
+									: "";
+							cprocess.stdout.on("data", function (data) {
+								//Here is where the output goes
+								// split by new line
+								const lines = addBackgroundColor(
+									data
+										.split(/\r?\n/)
+										.map((line) => `${prefix}${line}`)
+										.join("\n"),
+								);
+								// redact
+								// iterate over each env var
+								// for each env var, replace the value with a redacted version
+
+								const redactedLines =
+									(showRedacted ||
+										dotsecConfig?.defaults?.options?.showRedacted) !== true
+										? Object.entries(expandedEnvVarsWithoutEnv.parsed || {})
+												.sort(([, a], [, b]) => {
+													if (a.length > b.length) {
+														return -1;
+													} else if (a.length < b.length) {
+														return 1;
+													} else {
+														return 0;
+													}
+												})
+												.reduce((acc, [key, value]) => {
+													console.log("KEY", key);
+													if (dotsecConfig?.redaction?.ignore?.includes(key)) {
+														console.log("IGNORING", key);
+														return acc;
+													} else {
+														const redactedValue = value.replace(/./g, "*");
+														return acc.replace(value, redactedValue);
+													}
+												}, lines as string)
+										: lines;
+
+								console.log(redactedLines);
+							});
+
+							cprocess.stderr.setEncoding("utf8");
+							cprocess.stderr.on("data", function (data) {
+								process.stderr.write(data.toString());
+							});
+
+							cprocess.on("exit", (code: number) => {
+								resolve(code);
+							});
 						});
 
-						if (spawn.status !== 0) {
-							process.exit(spawn.status || 1);
+						if (waiter !== 0) {
+							process.exit(waiter || 1);
 						}
 					} else {
 						throw new Error("No .env or .sec file provided");

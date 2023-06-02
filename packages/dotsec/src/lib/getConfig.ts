@@ -43,6 +43,10 @@ export const getMagicalConfig = async (
 					defaults: {
 						...data?.defaults,
 						...defaultConfig.defaults,
+						output: {
+							...data?.defaults?.output,
+							...defaultConfig.defaults?.output,
+						},
 						plugins: {
 							...data?.defaults?.plugins,
 							...defaultConfig.defaults?.plugins,
@@ -69,6 +73,10 @@ export const getMagicalConfig = async (
 					defaults: {
 						...data?.defaults,
 						...defaultConfig.defaults,
+						output: {
+							...data?.defaults?.output,
+							...defaultConfig.defaults?.output,
+						},
 						plugins: {
 							...data?.defaults?.plugins,
 							...defaultConfig.defaults?.plugins,

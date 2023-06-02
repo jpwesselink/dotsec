@@ -15,7 +15,9 @@ export const configureDecrypt: ConfigureDecrypt =
 			path.resolve(commandConfig.defaults.secFile),
 		);
 
-		const ciphertextContent = loadCiphertextResult.unwrap();
+		const ciphertextContent = loadCiphertextResult.expect(
+			"Failed to load ciphertext",
+		);
 
 		let plaintextContent: string | undefined;
 

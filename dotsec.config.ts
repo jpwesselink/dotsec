@@ -7,6 +7,11 @@ export const dotsec: DotsecConfig<{
 	defaults: {
 		encryptionEngine: "aws",
 
+		options: {
+			showBackgroundColor: true,
+			showOutputPrefix: true,
+			outputBackgroundColor: "red",
+		},
 		plugins: {
 			aws: {
 				kms: {},
@@ -20,5 +25,8 @@ export const dotsec: DotsecConfig<{
 				secretsManager: true,
 			},
 		},
+	},
+	redaction: {
+		ignore: ["DEVELOPMENT_STAGE"],
 	},
 };
