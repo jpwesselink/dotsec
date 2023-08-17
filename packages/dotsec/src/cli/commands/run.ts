@@ -144,7 +144,7 @@ const addRunProgam = (
 								outputBackgroundColor ||
 								dotsecConfig.defaults?.options?.outputBackgroundColor;
 							if (backgroundColor === true) {
-								backgroundColor = "bright-red";
+								backgroundColor = "red-bright";
 							}
 
 							// hideOutputBackgroundColor;
