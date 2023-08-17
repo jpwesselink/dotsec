@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.32](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.31...v4.0.0-alpha.32) (2023-08-17)
+
+**Note:** Version bump only for package @dotsec/plugin-aws
+
+
+
+
+
 # [4.0.0-alpha.31](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.30...v4.0.0-alpha.31) (2023-08-17)
 
 **Note:** Version bump only for package @dotsec/plugin-aws

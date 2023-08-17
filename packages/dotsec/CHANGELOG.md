@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.32](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.31...v4.0.0-alpha.32) (2023-08-17)
+
+
+### Features
+
+* **dotsec:** docs, output background color options ([2dd7d74](https://github.com/jpwesselink/dotsec/commit/2dd7d747ac3cf55165ebc410eaceb584d3978849))
+
+
+
+
+
 # [4.0.0-alpha.31](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.30...v4.0.0-alpha.31) (2023-08-17)
 
 
