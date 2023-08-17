@@ -208,9 +208,7 @@ const addRunProgam = (
 													}
 												})
 												.reduce((acc, [key, value]) => {
-													console.log("KEY", key);
-													if (dotsecConfig?.redaction?.ignore?.includes(key)) {
-														console.log("IGNORING", key);
+													if (dotsecConfig?.redaction?.show?.includes(key)) {
 														return acc;
 													} else {
 														const redactedValue = value.replace(/./g, "*");
