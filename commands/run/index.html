@@ -368,6 +368,87 @@
     Output options
   </a>
   
+    <nav class="md-nav" aria-label="Output options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#redaction" class="md-nav__link">
+    Redaction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-output-background-color" class="md-nav__link">
+    Show output background color
+  </a>
+  
+    <nav class="md-nav" aria-label="Show output background color">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-the-show-output-background-color-flag" class="md-nav__link">
+    Using the --show-output-background-color flag
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-dotsec_show_output_background_color-environment-variable" class="md-nav__link">
+    Using the DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR environment variable
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-defaultsoptionsshowoutputbackgroundcolor-config-option" class="md-nav__link">
+    Using the defaults.options.showOutputBackgroundColor config option
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-a-custom-output-background-color" class="md-nav__link">
+    Use a custom output background color
+  </a>
+  
+    <nav class="md-nav" aria-label="Use a custom output background color">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-the-output-background-color-flag" class="md-nav__link">
+    Using the --output-background-color flag
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-dotsec_output_background_color-environment-variable" class="md-nav__link">
+    Using the DOTSEC_OUTPUT_BACKGROUND_COLOR environment variable
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-defaultsoptionsoutputbackgroundcolor-config-option" class="md-nav__link">
+    Using the defaults.options.outputBackgroundColor config option
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -758,6 +839,87 @@
     Output options
   </a>
   
+    <nav class="md-nav" aria-label="Output options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#redaction" class="md-nav__link">
+    Redaction
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#show-output-background-color" class="md-nav__link">
+    Show output background color
+  </a>
+  
+    <nav class="md-nav" aria-label="Show output background color">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-the-show-output-background-color-flag" class="md-nav__link">
+    Using the --show-output-background-color flag
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-dotsec_show_output_background_color-environment-variable" class="md-nav__link">
+    Using the DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR environment variable
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-defaultsoptionsshowoutputbackgroundcolor-config-option" class="md-nav__link">
+    Using the defaults.options.showOutputBackgroundColor config option
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#use-a-custom-output-background-color" class="md-nav__link">
+    Use a custom output background color
+  </a>
+  
+    <nav class="md-nav" aria-label="Use a custom output background color">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#using-the-output-background-color-flag" class="md-nav__link">
+    Using the --output-background-color flag
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-dotsec_output_background_color-environment-variable" class="md-nav__link">
+    Using the DOTSEC_OUTPUT_BACKGROUND_COLOR environment variable
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-the-defaultsoptionsoutputbackgroundcolor-config-option" class="md-nav__link">
+    Using the defaults.options.outputBackgroundColor config option
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -821,19 +983,39 @@ npx dotsec run --using env {your command}
 DOTSEC_USING=env npx dotsec run node -e \&quot;console.log(process.env)\&quot;
 </code></pre>
 <h2 id="output-options">Output options</h2>
-<p>By default each line output by the command will be embellished with a background color and a prefix. You can disable this behavior by using the <code>--show-raw-output</code> option.</p>
-<pre><code class="language-sh">npx dotsec run `--show-raw-output` {your command}
+<h3 id="redaction">Redaction</h3>
+<p>By default - and design - the output of the command will be redacted. You can disable this behavior in a couple of ways:</p>
+<ul>
+<li>By making exceptions for specific variables in the config file. Adding env var names to the <code>redaction.show</code> array will prevent them from being redacted if redaction is enabled.</li>
+<li>By disabling redaction:</li>
+<li>On the command line using the <code>--show-redacted</code> option:</li>
+<li>By setting the <code>DOTSEC_SHOW_REDACTED</code> environment variable to <code>true</code></li>
+<li>By setting the <code>defaults.options.showRedacted</code> config option to <code>true</code></li>
+</ul>
+<h3 id="show-output-background-color">Show output background color</h3>
+<p>If you'd like to highlight the output of the <code>run</code> to signal that its <code>env</code> or <code>sec</code> variables are injected, you can do so in a couple of ways:</p>
+<ul>
+<li>On the command line using the <code>--show-output-background-color</code> flag</li>
+<li>By setting the <code>DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR</code> environment variable to <code>true</code></li>
+<li>By setting the <code>defaults.options.showOutputBackgroundColor</code> config option to <code>true</code></li>
+</ul>
+<h4 id="using-the-show-output-background-color-flag">Using the <code>--show-output-background-color</code> flag</h4>
+<pre><code class="language-sh">npx dotsec run --show-output-background-color {your command}
 </code></pre>
-<pre><code class="language-sh">### Output background color
-
-You can specify the output background using either the `--output-background-color` option on the command line, or the `DOTSEC_OUTPUT_BACKGROUND_COLOR` environment variable.
-
-```sh
-npx dotsec run --output-background-color red {your command}
+<h4 id="using-the-dotsec_show_output_background_color-environment-variable">Using the <code>DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR</code> environment variable</h4>
+<pre><code class="language-sh">DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR=true npx dotsec run {your command}
 </code></pre>
-<pre><code class="language-sh">DOTSEC_OUTPUT_BACKGROUND_COLOR=yellow npx dotsec run {your command}
+<h4 id="using-the-defaultsoptionsshowoutputbackgroundcolor-config-option">Using the <code>defaults.options.showOutputBackgroundColor</code> config option</h4>
+<pre><code class="language-ts">{
+  defaults: {
+    options: {
+      showOutputBackgroundColor: true;
+    }
+  }
+}
 </code></pre>
-<p>The following colors are supported:</p>
+<h3 id="use-a-custom-output-background-color">Use a custom output background color</h3>
+<p>By default, the background color is set to <code>red-bright</code>, however, the following colors from the excellent <a href="https://www.npmjs.com/package/chalk">chalk</a> package are supported:</p>
 <ul>
 <li>black</li>
 <li>red</li>
@@ -852,6 +1034,27 @@ npx dotsec run --output-background-color red {your command}
 <li>cyan-bright</li>
 <li>white-bright</li>
 </ul>
+<p>Setting a different background color can be achieved in a couple of ways:</p>
+<ul>
+<li>On the command line using the <code>--output-background-color</code> flag</li>
+<li>By setting the <code>DOTSEC_OUTPUT_BACKGROUND_COLOR</code> environment variable to a supported color</li>
+<li>By setting the <code>defaults.options.outputBackgroundColor</code> config option to a supported color</li>
+</ul>
+<h4 id="using-the-output-background-color-flag">Using the <code>--output-background-color</code> flag</h4>
+<pre><code class="language-sh">npx dotsec run --output-background-color blue {your command}
+</code></pre>
+<h4 id="using-the-dotsec_output_background_color-environment-variable">Using the <code>DOTSEC_OUTPUT_BACKGROUND_COLOR</code> environment variable</h4>
+<pre><code class="language-sh">DOTSEC_OUTPUT_BACKGROUND_COLOR=blue npx dotsec run {your command}
+</code></pre>
+<h4 id="using-the-defaultsoptionsoutputbackgroundcolor-config-option">Using the <code>defaults.options.outputBackgroundColor</code> config option</h4>
+<pre><code class="language-ts">{
+  defaults: {
+    options: {
+      outputBackgroundColor: &quot;blue&quot;;
+    }
+  }
+}
+</code></pre>
 <h2 id="config-file">Config file</h2>
 <p>See the <a href="../../reference/config/">config file</a> reference for more information on how to configure this command.</p>
 
