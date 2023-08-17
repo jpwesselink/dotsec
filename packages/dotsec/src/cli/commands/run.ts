@@ -143,7 +143,12 @@ const addRunProgam = (
 							let backgroundColor =
 								outputBackgroundColor ||
 								dotsecConfig.defaults?.options?.outputBackgroundColor;
-							if (backgroundColor === true) {
+
+							// if backgroundColor is a boolean
+							if (
+								typeof backgroundColor === "boolean" &&
+								backgroundColor === true
+							) {
 								backgroundColor = "red-bright";
 							}
 
