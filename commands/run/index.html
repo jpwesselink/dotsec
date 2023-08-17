@@ -17,7 +17,7 @@
         <link rel="next" href="../encrypt/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.3, mkdocs-material-9.1.14">
+      <meta name="generator" content="mkdocs-1.5.2, mkdocs-material-9.1.21">
     
     
       
@@ -25,10 +25,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.85bb2934.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.eebd395e.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.a6bdf11c.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ecc896b0.min.css">
       
       
 
@@ -359,6 +359,13 @@
         <li class="md-nav__item">
   <a href="#without-encryption-plugins" class="md-nav__link">
     Without encryption plugins
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#output-options" class="md-nav__link">
+    Output options
   </a>
   
 </li>
@@ -747,6 +754,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#output-options" class="md-nav__link">
+    Output options
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#config-file" class="md-nav__link">
     Config file
   </a>
@@ -796,7 +810,7 @@ npx dotsec run --using env {your command}
 <pre><code class="language-sh">npx dotsec run --using env node -e \&quot;console.log(process.env)\&quot;
 </code></pre>
 <p>Run a command with a specific <code>.env</code> file</p>
-<pre><code class="language-sh">$ npx dotsec run --using env --env-file .env node -e \&quot;console.log(process.env)\&quot;
+<pre><code class="language-sh">npx dotsec run --using env --env-file .env node -e \&quot;console.log(process.env)\&quot;
 </code></pre>
 <p>Run a command with a specific <code>ENV_FILE</code> variable</p>
 <pre><code class="language-sh">ENV_FILE=.env.dev npx dotsec run --using env node -e \&quot;console.log(process.env)\&quot;
@@ -806,6 +820,38 @@ npx dotsec run --using env {your command}
 ```sh
 DOTSEC_USING=env npx dotsec run node -e \&quot;console.log(process.env)\&quot;
 </code></pre>
+<h2 id="output-options">Output options</h2>
+<p>By default each line output by the command will be embellished with a background color and a prefix. You can disable this behavior by using the <code>--show-raw-output</code> option.</p>
+<pre><code class="language-sh">npx dotsec run `--show-raw-output` {your command}
+</code></pre>
+<pre><code class="language-sh">### Output background color
+
+You can specify the output background using either the `--output-background-color` option on the command line, or the `DOTSEC_OUTPUT_BACKGROUND_COLOR` environment variable.
+
+```sh
+npx dotsec run --output-background-color red {your command}
+</code></pre>
+<pre><code class="language-sh">DOTSEC_OUTPUT_BACKGROUND_COLOR=yellow npx dotsec run {your command}
+</code></pre>
+<p>The following colors are supported:</p>
+<ul>
+<li>black</li>
+<li>red</li>
+<li>green</li>
+<li>yellow</li>
+<li>blue</li>
+<li>magenta</li>
+<li>cyan</li>
+<li>white</li>
+<li>black-bright, (alias: gray, grey)</li>
+<li>red-bright</li>
+<li>green-bright</li>
+<li>yellow-bright</li>
+<li>blue-bright</li>
+<li>magenta-bright</li>
+<li>cyan-bright</li>
+<li>white-bright</li>
+</ul>
 <h2 id="config-file">Config file</h2>
 <p>See the <a href="../../reference/config/">config file</a> reference for more information on how to configure this command.</p>
 
@@ -887,10 +933,10 @@ DOTSEC_USING=env npx dotsec run node -e \&quot;console.log(process.env)\&quot;
       <div class="md-dialog__inner md-typeset"></div>
     </div>
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.footer"], "search": "../../assets/javascripts/workers/search.208ed371.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.indexes", "navigation.sections", "navigation.expand", "navigation.footer"], "search": "../../assets/javascripts/workers/search.74e28a9f.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.b4d07000.min.js"></script>
+      <script src="../../assets/javascripts/bundle.220ee61c.min.js"></script>
       
     
   </body>
