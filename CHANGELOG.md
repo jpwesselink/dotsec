@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.31](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.30...v4.0.0-alpha.31) (2023-08-17)
+
+
+### Features
+
+* **dotsec:** docs, output background color options ([328445e](https://github.com/jpwesselink/dotsec/commit/328445e7c067a532ab27b3f0667aabd060ba5109))
+
+
+
+
+
 # [4.0.0-alpha.30](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.29...v4.0.0-alpha.30) (2023-08-17)
 
 **Note:** Version bump only for package dotsec-monorepo
