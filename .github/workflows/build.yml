@@ -25,12 +25,12 @@ jobs:
         run: |
           yarn turbo build
 
-      # - name: Versioning
-      #   run: |
-      #     git config user.name "${{ github.actor }}"
-      #     git config user.email "${{ github.actor}}@users.noreply.github.com"
-      #     yarn lerna publish prerelease --conventional-commits --force-publish
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Versioning
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor}}@users.noreply.github.com"
+          yarn lerna publish prerelease --conventional-commits --force-publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - run: pip install mkdocs-material
       - run: mkdocs gh-deploy --force
