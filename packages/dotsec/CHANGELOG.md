@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.30](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.29...v4.0.0-alpha.30) (2023-08-17)
+
+**Note:** Version bump only for package dotsec
+
+
+
+
+
 # [4.0.0-alpha.29](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.28...v4.0.0-alpha.29) (2023-08-17)
 
 **Note:** Version bump only for package dotsec
