@@ -1,6 +1,6 @@
 {
     "name": "@dotsec/plugin-aws",
-    "version": "4.0.0-alpha.34",
+    "version": "4.0.0-alpha.35",
     "description": "",
     "tags": [
         "dotsec-plugin"
