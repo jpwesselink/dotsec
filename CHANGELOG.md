@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.33](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.32...v4.0.0-alpha.33) (2023-08-17)
+
+
+### Bug Fixes
+
+* **dotsec:** booleans are hard ([e6624f4](https://github.com/jpwesselink/dotsec/commit/e6624f4f8ea46a2af154fb08903a8e02087f9b8e))
+
+
+
+
+
 # [4.0.0-alpha.32](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.31...v4.0.0-alpha.32) (2023-08-17)
 
 
