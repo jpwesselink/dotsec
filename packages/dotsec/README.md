@@ -1,7 +1,15 @@
 # dotsec
 
-The solution offers encryption and decryption of `.env` files to and from `.sec` files, the ability to run a command with the values of a `.env`/`.sec` file in its environment, and the ability to push selected `.env`/`.sec` entries to AWS Systems Manager Parameter Store and AWS Secrets Manager.
-Encrypts your `.env` file with the AWS Encryption SDK so you can safely commit it to your repository.
+The solution offers encryption and decryption of `.env` files to and from `.sec` files, the ability to run a command with the values of a `.env`/`.sec` file in its environment. The AWS plugin adds the ability to push selected `.env`/`.sec` entries to AWS Systems Manager Parameter Store and AWS Secrets Manager.
+
+Currently there are two methods of encryption supported:
+
+- [`@dotsec/plugin-pke`](./packages/plugin-pke/README.md) - Using Public Key Encryption
+- [`@dotsec/plugin-aws`](./packages/plugin-aws/README.md) - Using AWS Key Management Service (AWS KMS)
+
+## Why?
+
+Environment variables are a great way to configure your application. However, they shouldn't be committed to your repository. This is because they often contain sensitive information, like passwords, API keys, and other secrets. This is where `dotsec` comes in. It allows you to encrypt your environment variables, and store them in a `.sec` file, which can be committed to your repository.
 
 ## Features
 
@@ -44,9 +52,9 @@ import { DotsecPluginAws } from "@dotsec/plugin-aws";
 import { DotsecConfig } from "dotsec";
 
 export const dotsec: DotsecConfig<{ plugins: DotsecPluginAws }> = {
- defaults: {
-  encryptionEngine: "aws",
- },
+  defaults: {
+    encryptionEngine: "aws",
+  },
 };
 ```
 
@@ -110,7 +118,8 @@ npx dotsec push
 ```
 
 > You might want to set AWS_REGION before running the command. If you don't, the region will be set to `eu-west-1`.
-<!-- 
+
+<!--
 ## Usage
 
 If you don't have an AWS KMS key with an alias, you can create one with the following command:
