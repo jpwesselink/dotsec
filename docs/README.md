@@ -17,6 +17,7 @@ With PKE support:
 ```sh
 npm install --save dotsec @dotsec/plugin-pke
 npx dotsec --plugin @dotsec/plugin-pke pke init
+npx dotsec pke create-keypair
 ```
 
 ## Usage
