@@ -11,6 +11,7 @@ import { setProgramOptions } from "../options";
 import { camelCase } from "camel-case";
 import chalk from "chalk";
 
+import { dotsec } from "_dotsec.config";
 import { Command } from "commander";
 import { expand } from "dotenv-expand";
 import { spawn } from "node:child_process";
@@ -48,7 +49,6 @@ const addRunProgam = (
 						engine,
 						showRedacted,
 						outputBackgroundColor,
-						showOutputBackgroundColor,
 						showOutputPrefix,
 						outputPrefix,
 					} = command.optsWithGlobals<RunCommandOptions>();
@@ -140,29 +140,27 @@ const addRunProgam = (
 
 							cprocess.stdout.setEncoding("utf8");
 
+							let backgroundColor =
+								outputBackgroundColor ||
+								dotsecConfig.defaults?.options?.outputBackgroundColor;
+							if (backgroundColor === true) {
+								backgroundColor = "bright-red";
+							}
+
 							// hideOutputBackgroundColor;
 							let addBackgroundColor: chalk.Chalk | ((str: string) => string) =
-								showOutputBackgroundColor ||
-								dotsecConfig.defaults?.options?.showBackgroundColor
-									? chalk.bgRedBright
-									: (str: string) => str;
-							if (
-								outputBackgroundColor &&
-								(showOutputBackgroundColor ||
-									dotsecConfig.defaults?.options?.showBackgroundColor)
-							) {
+								(str: string) => str;
+							if (backgroundColor) {
 								if (
-									!backgroundColors.includes(
-										outputBackgroundColor as BackgroundColor,
-									)
+									!backgroundColors.includes(backgroundColor as BackgroundColor)
 								) {
 									// throw error
 									throw new Error(
-										`Invalid background color: ${outputBackgroundColor}`,
+										`Invalid background color: ${backgroundColor}`,
 									);
 								}
 								const backgroundColorFnName = camelCase(
-									`bg-${outputBackgroundColor}`,
+									`bg-${backgroundColor}`,
 								);
 								if (chalk[backgroundColorFnName]) {
 									addBackgroundColor = chalk[

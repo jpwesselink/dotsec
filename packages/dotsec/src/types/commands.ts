@@ -42,7 +42,6 @@ export type RunCommandOptions = GlobalCommandOptions & {
 	engine: string;
 	showRedacted?: boolean;
 	outputBackgroundColor?: string;
-	showOutputBackgroundColor?: boolean;
 	showOutputPrefix?: boolean;
 	outputPrefix?: string;
 };

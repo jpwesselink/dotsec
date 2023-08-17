@@ -17,11 +17,10 @@ export type DotsecConfig<T extends DotsecPlugins = DotsecPlugins> = {
 			showRedacted?: boolean;
 			showOutputPrefix?: boolean;
 			outputPrefix?: string;
-			showBackgroundColor?: boolean;
-			outputBackgroundColor?: BackgroundColor;
+			outputBackgroundColor?: boolean | BackgroundColor;
 		};
 	};
-	redaction?: { show?: string[] };
+	redaction?: { show: string[] };
 	push?: {
 		[key: string]: {
 			[PluginKey in keyof T["plugins"]]?: T["plugins"][PluginKey]["push"];

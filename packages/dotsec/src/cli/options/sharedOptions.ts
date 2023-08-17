@@ -38,15 +38,9 @@ export const usingNoEncryptionEngineOption: ExpandedCommandOption = {
 
 export const showRedactedOption: ExpandedCommandOption = {
 	flags: "--show-redacted",
-	description: 'Wether to show redacted values."',
+	description: "Wether to show redacted values",
 	env: "DOTSEC_SHOW_REDACTED",
-};
-
-export const embellishOutputOption: ExpandedCommandOption = {
-	flags: "--embellish-output",
-	description:
-		"Show embellished output, with (dotsec) prefix, and background color",
-	env: "DOTSEC_EMBELLISH_OUTPUT",
+	defaultValue: false,
 };
 
 export const showOutputPrefixOption: ExpandedCommandOption = {
@@ -58,12 +52,6 @@ export const outputPrefixOption: ExpandedCommandOption = {
 	flags: "--output-prefix <outputPrefix>",
 	description: "Output prefix",
 	env: "DOTSEC_OUTPUT_PREFIX",
-};
-
-export const showOutputBackgroundColorOption: ExpandedCommandOption = {
-	flags: "--show-output-background-color",
-	description: "Show output background color",
-	env: "DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR",
 };
 
 export const outputBackgroundColorOption: ExpandedCommandOption = {

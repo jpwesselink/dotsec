@@ -3,12 +3,12 @@
 > Without encryption plugins this command will only inject .env variables into the environment.
 > If you want to use encryption plugins, you need to install them first, please see the [plugins](../plugins/README.md) section for more information.
 
-```sh
+````sh
 ## Without encryption plugins
 
 ```sh
 npx dotsec run --using env {your command}
-```
+````
 
 ## With encryption plugins
 
@@ -50,35 +50,60 @@ Run a command with a specific `ENV_FILE` variable
 ENV_FILE=.env.dev npx dotsec run --using env node -e \"console.log(process.env)\"
 ```
 
-```sh
+````sh
 You can also specify 'using' as an environment variable
 
 ```sh
 DOTSEC_USING=env npx dotsec run node -e \"console.log(process.env)\"
-```
+````
 
 ## Output options
 
-By default each line output by the command will be embellished with a background color and a prefix. You can disable this behavior by using the `--show-raw-output` option.
+### Redaction
+
+By default - and design - the output of the command will be redacted. You can disable this behavior in a couple of ways:
+
+- By making exceptions for specific variables in the config file. Adding env var names to the `redaction.show` array will prevent them from being redacted if redaction is enabled.
+- By disabling redaction:
+  - On the command line using the `--show-redacted` option:
+  - By setting the `DOTSEC_SHOW_REDACTED` environment variable to `true`
+  - By setting the `defaults.options.showRedacted` config option to `true`
+
+### Show output background color
+
+If you'd like to highlight the output of the `run` to signal that its `env` or `sec` variables are injected, you can do so in a couple of ways:
+
+- On the command line using the `--show-output-background-color` flag
+- By setting the `DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR` environment variable to `true`
+- By setting the `defaults.options.showOutputBackgroundColor` config option to `true`
+
+#### Using the `--show-output-background-color` flag
 
 ```sh
-npx dotsec run `--show-raw-output` {your command}
+npx dotsec run --show-output-background-color {your command}
 ```
 
-```sh
-### Output background color
-
-You can specify the output background using either the `--output-background-color` option on the command line, or the `DOTSEC_OUTPUT_BACKGROUND_COLOR` environment variable.
+#### Using the `DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR` environment variable
 
 ```sh
-npx dotsec run --output-background-color red {your command}
+DOTSEC_SHOW_OUTPUT_BACKGROUND_COLOR=true npx dotsec run {your command}
 ```
 
-```sh
-DOTSEC_OUTPUT_BACKGROUND_COLOR=yellow npx dotsec run {your command}
+#### Using the `defaults.options.showOutputBackgroundColor` config option
+
+```ts
+{
+  defaults: {
+    options: {
+      showOutputBackgroundColor: true;
+    }
+  }
+}
 ```
 
-The following colors are supported:
+### Use a custom output background color
+
+By default, the background color is set to `red-bright`, however, the following colors from the excellent [chalk](https://www.npmjs.com/package/chalk) package are supported:
 
 - black
 - red
@@ -97,7 +122,35 @@ The following colors are supported:
 - cyan-bright
 - white-bright
 
+Setting a different background color can be achieved in a couple of ways:
 
+- On the command line using the `--output-background-color` flag
+- By setting the `DOTSEC_OUTPUT_BACKGROUND_COLOR` environment variable to a supported color
+- By setting the `defaults.options.outputBackgroundColor` config option to a supported color
+
+#### Using the `--output-background-color` flag
+
+```sh
+npx dotsec run --output-background-color blue {your command}
+```
+
+#### Using the `DOTSEC_OUTPUT_BACKGROUND_COLOR` environment variable
+
+```sh
+DOTSEC_OUTPUT_BACKGROUND_COLOR=blue npx dotsec run {your command}
+```
+
+#### Using the `defaults.options.outputBackgroundColor` config option
+
+```ts
+{
+  defaults: {
+    options: {
+      outputBackgroundColor: "blue";
+    }
+  }
+}
+```
 
 ## Config file
 

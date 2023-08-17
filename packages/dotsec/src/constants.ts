@@ -10,5 +10,8 @@ export const defaultConfig: DotsecConfig = {
 		// plugins: {
 		// 	pke: {},
 		// },
+		options: {
+			showRedacted: false,
+		},
 	},
 };
