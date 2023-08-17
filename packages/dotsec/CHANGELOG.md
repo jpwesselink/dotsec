@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.34](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.33...v4.0.0-alpha.34) (2023-08-17)
+
+
+### Bug Fixes
+
+* **dotsec:** removed default background color value ([365d774](https://github.com/jpwesselink/dotsec/commit/365d77470a5b33509d2c65ab20853c65a758be80))
+
+
+
+
+
 # [4.0.0-alpha.33](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.32...v4.0.0-alpha.33) (2023-08-17)
 
 
