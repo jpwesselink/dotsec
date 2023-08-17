@@ -58,8 +58,7 @@ export const outputBackgroundColorOption: ExpandedCommandOption = {
 	flags: "--output-background-color <outputBackgroundColor>",
 	description: "Background color of the output.",
 	env: "DOTSEC_OUTPUT_BACKGROUND_COLOR",
-	choices: backgroundColors as unknown as string[],
-	defaultValue: "red-bright",
+	choices: [...backgroundColors, true] as unknown as string[],
 };
 
 export const yesOption: ExpandedCommandOption = {
