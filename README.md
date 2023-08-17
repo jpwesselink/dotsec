@@ -17,6 +17,7 @@ With PKE support:
 ```sh
 npm install dotsec @dotsec/plugin-pke
 npx dotsec --plugin @dotsec/plugin-pke pke init
+npx dotsec pke create-keypair
 ```
 
 ## Usage
@@ -25,7 +26,11 @@ npx dotsec --plugin @dotsec/plugin-pke pke init
 npx dotsec --help
 ```
 
-<!-- 
+## Docs
+
+https://jpwesselink.github.io/dotsec/
+
+<!--
 `dotsec` is a tool for managing environment variables in a secure way. Encrypted environment variables are stored in a `.sec` file, and decrypted to a `.env` file. The `.sec` file can be committed to your repository. The `.env` file should not be committed to your repository.
 
 Next to encrypting and decrypting environment variables, `dotsec` can also be used to run a command with the values of a `.env` file in its environment, or with the values of a `.sec` file in its environment.
@@ -68,7 +73,7 @@ When using the AWS plugin, dotsec can also push selected `.env`/`.sec` entries t
 - For initialisation enough credentials for creating a KMS key, and alias.
 - For usage enough credentials for using the KMS key to encrypt and/or decrypt.
 - An AWS KMS key with an alias. -->
-<!-- 
+<!--
 ## Usage
 
 If you don't have an AWS KMS key with an alias, you can create one with the following command:
@@ -185,7 +190,7 @@ Take your favorite editor, and edit the `dotsec.config.ts` file. Add the followi
 ```sh
 npx dotsec push --env --to-aws-secrets-manager
 ``` -->
-<!-- 
+<!--
 ### FAQ
 
 #### Is it safe to commit a ``.sec`` and `dotsec.config.ts` file alongside your code?
