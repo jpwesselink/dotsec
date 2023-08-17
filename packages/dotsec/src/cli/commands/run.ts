@@ -179,7 +179,11 @@ const addRunProgam = (
 							const prefix =
 								showOutputPrefix ||
 								dotsecConfig?.defaults?.options?.showOutputPrefix
-									? `${outputPrefix || "(dotsec) "}`
+									? `${
+											dotsecConfig?.defaults?.options?.outputPrefix ||
+											outputPrefix ||
+											"(dotsec) "
+									  }`
 									: "";
 							cprocess.stdout.on("data", function (data) {
 								//Here is where the output goes
