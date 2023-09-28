@@ -61,13 +61,9 @@ DOTSEC_USING=env npx dotsec run node -e \"console.log(process.env)\"
 
 ### Redaction
 
-By default - and design - the output of the command will be redacted. You can disable this behavior in a couple of ways:
+By default - and by safety design - the output of the command will not be redacted. This means that during `run`, the values of your env vars will replaced by asterisks (`*`) in the output. This will prevent your secrets from leaking into logs or other output channels.
 
-- By making exceptions for specific variables in the config file. Adding env var names to the `redaction.show` array will prevent them from being redacted if redaction is enabled.
-- By disabling redaction:
-  - On the command line using the `--show-redacted` option:
-  - By setting the `DOTSEC_SHOW_REDACTED` environment variable to `true`
-  - By setting the `defaults.options.showRedacted` config option to `true`
+However, you can make exceptions for specific variables by adding env var names to the `redaction.show` array will prevent them from being redacted if redaction is enabled.
 
 ### Show output background color
 

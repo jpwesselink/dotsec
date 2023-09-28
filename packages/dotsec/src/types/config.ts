@@ -14,7 +14,6 @@ export type DotsecConfig<T extends DotsecPlugins = DotsecPlugins> = {
 			envFile?: string;
 			secFile?: string;
 			createManifest?: boolean;
-			showRedacted?: boolean;
 			showOutputPrefix?: boolean;
 			outputPrefix?: string;
 			outputBackgroundColor?: boolean | BackgroundColor;

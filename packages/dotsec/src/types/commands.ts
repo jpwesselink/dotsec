@@ -40,7 +40,6 @@ export type RunCommandOptions = GlobalCommandOptions & {
 	secFile?: string;
 	using: "env" | "sec";
 	engine: string;
-	showRedacted?: boolean;
 	outputBackgroundColor?: string;
 	showOutputPrefix?: boolean;
 	outputPrefix?: string;

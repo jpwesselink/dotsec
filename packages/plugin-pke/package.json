@@ -1,6 +1,6 @@
 {
     "name": "@dotsec/plugin-pke",
-    "version": "4.0.0-alpha.35",
+    "version": "4.0.0-alpha.40",
     "description": "",
     "tags": [
         "dotsec-plugin"
@@ -34,18 +34,20 @@
     "license": "MIT",
     "scripts": {
         "dev": "tsup --watch ./src --onSuccess \"node dist/index.js\"",
-        "build": "tsup"
+        "build": "tsup",
+        "clean": "rm -rf dist"
     },
     "peerDependencies": {
         "dotsec": "*"
     },
     "devDependencies": {
         "@types/node": "^18.14.6",
+        "dotsec": "*",
         "tsup": "^6.6.3"
     },
     "dependencies": {
         "change-case": "^4.1.2",
         "typescript": "~4.9.5"
     },
-    "gitHead": "66ee43fb3b55609223090522a27eed8025f05460"
+    "gitHead": "119772183e6e291ff2750141a459f9f1058646bb"
 }

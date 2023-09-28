@@ -36,13 +36,6 @@ export const usingNoEncryptionEngineOption: ExpandedCommandOption = {
 	env: "DOTSEC_USING",
 };
 
-export const showRedactedOption: ExpandedCommandOption = {
-	flags: "--show-redacted",
-	description: "Wether to show redacted values",
-	env: "DOTSEC_SHOW_REDACTED",
-	defaultValue: false,
-};
-
 export const showOutputPrefixOption: ExpandedCommandOption = {
 	flags: "--show-output-prefix",
 	description: "Show output prefix",
