@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.41](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.35...v4.0.0-alpha.41) (2023-09-28)
+
+**Note:** Version bump only for package @dotsec/plugin-pke
+
+
+
+
+
 # [4.0.0-alpha.35](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.34...v4.0.0-alpha.35) (2023-08-17)
 
 **Note:** Version bump only for package @dotsec/plugin-pke
