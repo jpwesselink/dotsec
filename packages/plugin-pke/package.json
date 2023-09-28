@@ -34,13 +34,15 @@
     "license": "MIT",
     "scripts": {
         "dev": "tsup --watch ./src --onSuccess \"node dist/index.js\"",
-        "build": "tsup"
+        "build": "tsup",
+        "clean": "rm -rf dist"
     },
     "peerDependencies": {
         "dotsec": "*"
     },
     "devDependencies": {
         "@types/node": "^18.14.6",
+        "dotsec": "*",
         "tsup": "^6.6.3"
     },
     "dependencies": {
