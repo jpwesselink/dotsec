@@ -5,18 +5,6 @@
       "dependsOn": [
         "^build"
       ]
-    },
-    "@dotsec/plugin-aws#build": {
-      "dependsOn": [
-        "dotsec#build"
-      ],
-      "outputs": []
-    },
-    "@dotsec/plugin-pke#build": {
-      "dependsOn": [
-        "dotsec#build"
-      ],
-      "outputs": []
     }
   }
 }

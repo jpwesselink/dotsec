@@ -47,7 +47,6 @@ const addRunProgam = (
 						using,
 						secFile,
 						engine,
-						showRedacted,
 						outputBackgroundColor,
 						showOutputPrefix,
 						outputPrefix,
@@ -188,43 +187,49 @@ const addRunProgam = (
 											"(dotsec) "
 									  }`
 									: "";
+
+							let lineBuffer: string = "";
+
 							cprocess.stdout.on("data", function (data) {
 								//Here is where the output goes
 								// split by new line
-								const lines = addBackgroundColor(
-									data
-										.split(/\r?\n/)
-										.map((line) => `${prefix}${line}`)
-										.join("\n"),
-								);
-								// redact
-								// iterate over each env var
-								// for each env var, replace the value with a redacted version
 
-								const redactedLines =
-									(showRedacted ||
-										dotsecConfig?.defaults?.options?.showRedacted) !== true
-										? Object.entries(expandedEnvVarsWithoutEnv.parsed || {})
-												.sort(([, a], [, b]) => {
-													if (a.length > b.length) {
-														return -1;
-													} else if (a.length < b.length) {
-														return 1;
-													} else {
-														return 0;
-													}
-												})
-												.reduce((acc, [key, value]) => {
-													if (dotsecConfig?.redaction?.show?.includes(key)) {
-														return acc;
-													} else {
-														const redactedValue = value.replace(/./g, "*");
-														return acc.replace(value, redactedValue);
-													}
-												}, lines as string)
-										: lines;
+								lineBuffer += data.toString();
 
-								console.log(redactedLines);
+								const lines: string[] = lineBuffer.split("\n");
+
+								for (let i = 0; i < lines.length - 1; i++) {
+									const line = lines[i];
+
+									const redactedLines = Object.entries(
+										expandedEnvVarsWithoutEnv.parsed || {},
+									)
+										.sort(([, a], [, b]) => {
+											if (a.length > b.length) {
+												return -1;
+											} else if (a.length < b.length) {
+												return 1;
+											} else {
+												return 0;
+											}
+										})
+										.reduce((acc, [key, value]) => {
+											if (dotsecConfig?.redaction?.show?.includes(key)) {
+												return acc;
+											} else {
+												const redactedValue = value.replace(/./g, "*");
+												return acc.replace(value, redactedValue);
+											}
+										}, line);
+
+									console.log(prefix + addBackgroundColor(redactedLines));
+								}
+
+								lineBuffer = lines[lines.length - 1];
+							});
+
+							cprocess.stdout.on("end", function () {
+								console.log(prefix + addBackgroundColor(lineBuffer));
 							});
 
 							cprocess.stderr.setEncoding("utf8");

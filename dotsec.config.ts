@@ -6,9 +6,7 @@ export const dotsec: DotsecConfig<{
 }> = {
 	defaults: {
 		encryptionEngine: "aws",
-
 		options: {
-			showBackgroundColor: true,
 			showOutputPrefix: true,
 			outputBackgroundColor: "red",
 		},
@@ -27,6 +25,6 @@ export const dotsec: DotsecConfig<{
 		},
 	},
 	redaction: {
-		ignore: ["DEVELOPMENT_STAGE"],
+		show: ["SPECIAL_ONE_FOR_SECRETS_MANAGER_AGAIN"],
 	},
 };
