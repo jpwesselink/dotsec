@@ -55,7 +55,7 @@ jobs:
       - name: Publish release
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          yarn lerna publish --force-publish
+          yarn lerna publish --force-publish --conventional-commits --yes
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
