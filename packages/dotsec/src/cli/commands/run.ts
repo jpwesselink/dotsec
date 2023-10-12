@@ -11,7 +11,6 @@ import { setProgramOptions } from "../options";
 import { camelCase } from "camel-case";
 import chalk from "chalk";
 
-import { dotsec } from "_dotsec.config";
 import { Command } from "commander";
 import { expand } from "dotenv-expand";
 import { spawn } from "node:child_process";
@@ -41,6 +40,10 @@ const addRunProgam = (
 				_options: Record<string, string>,
 				command: Command,
 			) => {
+				let lineBuffer: string = "";
+				let addBackgroundColor: chalk.Chalk | ((str: string) => string) = (
+					str: string,
+				) => str;
 				try {
 					const {
 						envFile,
@@ -152,8 +155,7 @@ const addRunProgam = (
 							}
 
 							// hideOutputBackgroundColor;
-							let addBackgroundColor: chalk.Chalk | ((str: string) => string) =
-								(str: string) => str;
+
 							if (backgroundColor) {
 								if (
 									!backgroundColors.includes(backgroundColor as BackgroundColor)
@@ -188,9 +190,7 @@ const addRunProgam = (
 									  }`
 									: "";
 
-							let lineBuffer: string = "";
-
-							cprocess.stdout.on("data", function (data) {
+							cprocess.stdout.on("data", (data) => {
 								//Here is where the output goes
 								// split by new line
 
@@ -228,12 +228,12 @@ const addRunProgam = (
 								lineBuffer = lines[lines.length - 1];
 							});
 
-							cprocess.stdout.on("end", function () {
+							cprocess.stdout.on("end", () => {
 								console.log(prefix + addBackgroundColor(lineBuffer));
 							});
 
 							cprocess.stderr.setEncoding("utf8");
-							cprocess.stderr.on("data", function (data) {
+							cprocess.stderr.on("data", (data) => {
 								process.stderr.write(data.toString());
 							});
 
@@ -243,6 +243,7 @@ const addRunProgam = (
 						});
 
 						if (waiter !== 0) {
+							console.log(addBackgroundColor(lineBuffer));
 							process.exit(waiter || 1);
 						}
 					} else {
@@ -270,10 +271,9 @@ const addRunProgam = (
 
 		subProgram.option(
 			"--engine <engine>",
-			`Encryption engine${engines.length > 0 ? "s" : ""}: ${
-				(engines.join(", "), engines.length === 1 ? engines[0] : undefined)
-			}`,
-			// engines.length === 1 ? engines[0] : undefined,
+			`Encryption engine${engines.length > 0 ? "s" : ""}: ${engines.join(
+				", ",
+			)}${engines.length === 1 ? engines[0] : undefined}`,
 		);
 	}
 	return subProgram;
