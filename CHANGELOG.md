@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.42](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.41...v4.0.0-alpha.42) (2023-10-12)
+
+
+### Bug Fixes
+
+* adds missing output on error ([#13](https://github.com/jpwesselink/dotsec/issues/13)) ([675cceb](https://github.com/jpwesselink/dotsec/commit/675cceb7b604b98125203b419cf1fb13abc7a950))
+
+
+
+
+
 # [4.0.0-alpha.41](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.35...v4.0.0-alpha.41) (2023-09-28)
 
 **Note:** Version bump only for package dotsec-monorepo
