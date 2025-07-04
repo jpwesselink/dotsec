@@ -131,6 +131,19 @@ const addRunProgam = (
 								},
 							});
 
+							// Forward SIGINT (Ctrl-C) to child process
+							const sigintHandler = () => {
+								cprocess.kill("SIGINT");
+							};
+							process.on("SIGINT", sigintHandler);
+
+							// Propagate child process errors
+							cprocess.on("error", (err) => {
+								process.removeListener("SIGINT", sigintHandler);
+								console.error("Failed to start child process:", err);
+								process.exit(1);
+							});
+
 							const expandedEnvVarsWithoutEnv = expand({
 								ignoreProcessEnv: true,
 								parsed: {
@@ -238,6 +251,7 @@ const addRunProgam = (
 							});
 
 							cprocess.on("exit", (code: number) => {
+								process.removeListener("SIGINT", sigintHandler);
 								resolve(code);
 							});
 						});
