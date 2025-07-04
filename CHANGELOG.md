@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0-alpha.46](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.45...v4.0.0-alpha.46) (2025-07-04)
+
+**Note:** Version bump only for package dotsec-monorepo
+
+
+
+
+
 # [4.0.0-alpha.44](https://github.com/jpwesselink/dotsec/compare/v4.0.0-alpha.43...v4.0.0-alpha.44) (2025-06-05)
 
 **Note:** Version bump only for package dotsec-monorepo
